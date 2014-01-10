@@ -15,14 +15,14 @@ class ProductOrderError(Exception):
 
 class ProductOrder:
     '''
-    ProductOrder is wrapper of dict that is the rep of a product order.
+    ProductOrder is a wrapper of dict that is the rep of a product order.
     It contains the following info:
         - The product number: "productNb" (as integer).
         - The description: "description" (as string).
         - The quantity to order: "qtyToOrder" (as integer)
         - The date the order is (has been) made: "date" (as date)
         
-    It give the following manip capabilities:
+    It give the following interfaces:
         - Set product number as Dictionnary behavior
         - Get product Number as Dictionnary behavior
         - Set product description as Dictionnary behavior
@@ -32,11 +32,12 @@ class ProductOrder:
         - Convert ProductOrder to String
         - Compare ProductOrder by returning the number of days between orders
     '''
-    PROD_NB_KEY = "productNb"
+    PROD_NB_KEY = "no. produit"
     DESC_KEY = "description"
-    QTY_TO_ORDER_KEY = "qtyToOrder"
+    QTY_TO_ORDER_KEY = "quantite"
     DATE_KEY = "date"
-    KEYS = (PROD_NB_KEY, DESC_KEY, QTY_TO_ORDER_KEY, DATE_KEY)
+    EMPLOYEE_KEY = "commis"
+    KEYS = (PROD_NB_KEY, DESC_KEY, QTY_TO_ORDER_KEY, DATE_KEY, EMPLOYEE_KEY)
     ROWS = (0, 1, 2, 3)
 
     def __computeDateString(self, string):
@@ -44,7 +45,7 @@ class ProductOrder:
         Compute the date inputed date string into a date.
         '''
         YEAR_IDX = 2
-        MOUNTH_IDX = 1
+        MONTH_IDX = 1
         DAY_IDX = 0
         #paturn defining the date string format (dd/mm/yy or dd/mm/yyyy)
         datePaturn = re.compile(r'''
@@ -68,7 +69,7 @@ class ProductOrder:
             currentYearThousands = int(date.today().year / 1000) * 1000
             dateValues[YEAR_IDX] += currentYearThousands
         try:
-            orderDate = date(dateValues[YEAR_IDX], dateValues[MOUNTH_IDX],
+            orderDate = date(dateValues[YEAR_IDX], dateValues[MONTH_IDX],
                              dateValues[DAY_IDX])
         except:
             pass
@@ -78,10 +79,10 @@ class ProductOrder:
         '''
         Constructor
         '''
-        self.orderData = {}
+        self.__orderData = {}
         #set all fields to None
         for key in self.KEYS:
-            self.orderData[key] = None
+            self.__orderData[key] = None
             
     def __getitem__(self, key):
         '''
@@ -90,10 +91,10 @@ class ProductOrder:
         '''
         #if date field is asked, return it in string of the format dd/mm/yy
         if key == self.DATE_KEY:
-            return self.orderData[key].strftime("%d/%m/%y")
+            return self.__orderData[key].strftime("%d/%m/%y")
         #if other field, simply return it as is
         else:
-            return self.orderData[key]
+            return self.__orderData[key]
     
     def __setitem__(self, key, value):
         '''
@@ -102,16 +103,16 @@ class ProductOrder:
         '''
         #if setting date field, process it into a date object befor assignation
         if key == self.DATE_KEY:
-            self.orderData[key] = self.__computeDateString(value)
+            self.__orderData[key] = self.__computeDateString(value)
         #if other field, simply assign it
         else:
-            self.orderData[key] = value
+            self.__orderData[key] = value
             
     def __eq__(self, productOrder):
         '''
         Compare the product number field of two product orders.
         '''
-        return self.orderData[self.PROD_NB_KEY] == productOrder[self.PROD_NB_KEY]
+        return self.__orderData[self.PROD_NB_KEY] == productOrder[self.PROD_NB_KEY]
         
     def getProductOrderStr(self):
         '''
@@ -121,13 +122,27 @@ class ProductOrder:
         '''
         string = ''
         for key in self.KEYS:
+            #if the field is empty, join N/A
+            if self[key] == None:
+                string = ';'.join((string, 'N/A'))
+            #if the field is a string, simply join it to the output
             if type(self[key]).__name__ == 'str':
                 string = ';'.join((string, self[key]))
+            #if its an integet, fomate it and join it to the output string
+            elif type(self[key]).__name__ == 'int':
+                string = ';'.join((string, '%d' % self.__orderData[key]))
+            #if anything else, join N/A
             else:
-                string = ';'.join((string, '%d' % self.orderData[key]))
+                string = ';'.join((string, 'N/A'))
+                
         return string
     
     def deltaProductOrder(self, productOrder):
-        return (self.orderData[ProductOrder.DATE_KEY] - 
-                productOrder.orderData[ProductOrder.DATE_KEY]).days
+        return (self.__orderData[ProductOrder.DATE_KEY] - 
+                productOrder.__orderData[ProductOrder.DATE_KEY]).days
+                
+    def ProductOrederIsValid(self):
+        '''
+        Check the validity of a product order.
+        '''
             

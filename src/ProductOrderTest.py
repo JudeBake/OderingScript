@@ -62,6 +62,19 @@ class DateSetterGetterTest(unittest.TestCase):
             result = self.__productOrder[ProductOrder.DATE_KEY]
             self.assertEqual(result, attendedResult, 'ProductOrder failed to set and get its date field.')
             
+class EmpoyeeSetterGetterTest(unittest.TestCase):
+    TEST_VALUE = ('jb', 'jf', 'justin')
+    __productOrder = ProductOrder()
+    
+    def testEmpoyeeSetterAndGetterTest(self):
+        '''
+        ProductOrder must be able to set and get its employee field.
+        '''
+        for value in self.TEST_VALUE:
+            self.__productOrder[ProductOrder.EMPLOYEE_KEY] = value;
+            result = self.__productOrder[ProductOrder.EMPLOYEE_KEY]
+            self.assertEqual(result, value, 'ProductOrder failed to set and get its employee field.')
+            
 class CmpProductOrderTest(unittest.TestCase):
     TEST_VALUE = ((133439, 133439, True), (132090, 103600, False))
     __productOrder1 = ProductOrder()
@@ -79,8 +92,8 @@ class CmpProductOrderTest(unittest.TestCase):
             self.assertEqual(result, attendedResult, 'ProductOrder failed to figure if it orders the same product than an other ProductOrder')
             
 class ProductOrderStrGetterTest(unittest.TestCase):
-    TEST_VALUE = ((133658, 'abcd', 100, '13/10/37', ';133658;abcd;100;13/10/37'),
-                  (103800, 'gdtkcvyl', 753, '01/05/14', ';103800;gdtkcvyl;753;01/05/14'))
+    TEST_VALUE = ((133658, 'abcd', 100, '13/10/37', 'jb', ';133658;abcd;100;13/10/37;jb'),
+                  (103800, 'gdtkcvyl', 753, '01/05/14', None, ';103800;gdtkcvyl;753;01/05/14;N/A'))
     __productOrder = ProductOrder()
     
     def testProductOrderStrGetter(self):
@@ -88,11 +101,12 @@ class ProductOrderStrGetterTest(unittest.TestCase):
         ProductOrder must be able to get a string representaion of its data
         in the format ;productNb;description;qtyToOrder;date.
         '''
-        for pNb, desc, qty, orderDate, attendedResult in self.TEST_VALUE:
+        for pNb, desc, qty, orderDate, empl, attendedResult in self.TEST_VALUE:
             self.__productOrder[ProductOrder.PROD_NB_KEY] = pNb
             self.__productOrder[ProductOrder.DESC_KEY] = desc
             self.__productOrder[ProductOrder.QTY_TO_ORDER_KEY] = qty
             self.__productOrder[ProductOrder.DATE_KEY] = orderDate
+            self.__productOrder[ProductOrder.EMPLOYEE_KEY] = empl
             result = self.__productOrder.getProductOrderStr()
             self.assertEqual(result, attendedResult, 'ProductOrder failed to get a string representaion of its data in the format productNb;description;qtyToOrder;date')
             
@@ -113,6 +127,29 @@ class DeltaProductOrderTest(unittest.TestCase):
             self.__productOrder2[ProductOrder.DATE_KEY] = value2
             result = self.__productOrder1.deltaProductOrder(self.__productOrder2)
             self.assertEqual(result, attendedResult, 'ProductOrder failed to calculate the number of days between itself and an other ProductOrder.')
+            
+class ValifityGetterTest(unittest.TestCase):
+    TEST_VALUE = ((None, 'asfefg', 100, '01/01/01', 'jb', False),
+                      (103030, '', 200, '01/01/01', 'jf', False),
+                      (103486, 'afeohg', None, '01/01/01','justin', False),
+                      (133036, 'kajsbeo', 1000, '01/0101', 'guy', False),
+                      (133025, 'afeoboi', 25, '01/01/01', None, False),
+                      (None, 'aibef', 25, '01/01/01/01', 'Daniel', False),
+                      (133045, 'aiefo', 3, '01/01/01', 'Daniel', True))
+    __productOrder = ProductOrder()
+    
+    def testValidityGetter(self):
+        '''
+        ProductOrder must be able to figure if it's valid or not.
+        '''
+        for pNb, desc, qty, date, empl, attendedResult in self.TEST_VALUE:
+            self.__productOrder[ProductOrder.PROD_NB_KEY] = pNb
+            self.__productOrder[ProductOrder.DESC_KEY] = desc
+            self.__productOrder[ProductOrder.QTY_TO_ORDER_KEY] = qty
+            self.__productOrder[ProductOrder.DATE_KEY] = date
+            self.__productOrder[ProductOrder.EMPLOYEE_KEY] = empl
+            result = self.__productOrder.ProductOrederIsValid()
+            self.assertEqual(result, attendedResult, 'ProductOrder failed to figure if it\'s valid or not.')
         
 if __name__ == "__main__":
     unittest.main()
