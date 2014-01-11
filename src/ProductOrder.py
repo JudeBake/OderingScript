@@ -129,10 +129,10 @@ class ProductOrder:
             if self[key] == None:
                 string = ';'.join((string, 'N/A'))
             #if the field is a string, simply join it to the output
-            elif type(self[key]).__name__ == 'str':
+            elif type(self[key]).__name__ == 'str' and self.__orderData[key]:
                 string = ';'.join((string, self[key]))
             #if its an integet, fomate it and join it to the output string
-            elif type(self[key]).__name__ == 'int':
+            elif type(self[key]).__name__ == 'int' and self.__orderData[key]:
                 string = ';'.join((string, '%d' % self[key]))
             #if anything else, join N/A
             else:
@@ -151,9 +151,7 @@ class ProductOrder:
         validity = True
         #look for None data, and 0 quantity
         for key in self.KEYS:
-            if self.__orderData[key] == None or \
-                        (key == self.QTY_TO_ORDER_KEY and 
-                         self.__orderData[key] == 0):
+            if not self.__orderData[key]:
                 validity = False
         return validity
             
