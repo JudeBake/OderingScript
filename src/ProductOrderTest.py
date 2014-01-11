@@ -130,11 +130,12 @@ class DeltaProductOrderTest(unittest.TestCase):
             
 class ValifityGetterTest(unittest.TestCase):
     TEST_VALUE = ((None, 'asfefg', 100, '01/01/01', 'jb', False),
-                      (103030, '', 200, '01/01/01', 'jf', False),
+                      (103030, None, 200, '01/01/01', 'jf', False),
                       (103486, 'afeohg', None, '01/01/01','justin', False),
                       (133036, 'kajsbeo', 1000, '01/0101', 'guy', False),
                       (133025, 'afeoboi', 25, '01/01/01', None, False),
                       (None, 'aibef', 25, '01/01/01/01', 'Daniel', False),
+                      (123945, 'eouty', 0, '10/10/10', 'jb', False),
                       (133045, 'aiefo', 3, '01/01/01', 'Daniel', True))
     __productOrder = ProductOrder()
     

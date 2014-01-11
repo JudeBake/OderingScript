@@ -58,20 +58,23 @@ class ProductOrder:
                             $                #end of string
                             ''', re.VERBOSE)
         #test the inputed date string and get its values if valid
-        dateValues = list(datePaturn.search(string).groups())
-        if not dateValues:
+        try:
+            dateValues = list(datePaturn.search(string).groups())
+        except:
+            dateValues = list()
             pass
         #convert the string list into an integer list
         dateValues = [int(element) for element in dateValues]
         #if the input string has 2 digit for the year, add to it the thousands
         #and undreds
-        if dateValues[YEAR_IDX] < 100:
+        if dateValues and dateValues[YEAR_IDX] < 100:
             currentYearThousands = int(date.today().year / 1000) * 1000
             dateValues[YEAR_IDX] += currentYearThousands
         try:
             orderDate = date(dateValues[YEAR_IDX], dateValues[MONTH_IDX],
                              dateValues[DAY_IDX])
         except:
+            orderDate = None
             pass
         return orderDate
         
@@ -90,7 +93,7 @@ class ProductOrder:
         For the date field the return is a string in the format dd/mm/yy.
         '''
         #if date field is asked, return it in string of the format dd/mm/yy
-        if key == self.DATE_KEY:
+        if key == self.DATE_KEY and self.__orderData[key]:
             return self.__orderData[key].strftime("%d/%m/%y")
         #if other field, simply return it as is
         else:
@@ -126,11 +129,11 @@ class ProductOrder:
             if self[key] == None:
                 string = ';'.join((string, 'N/A'))
             #if the field is a string, simply join it to the output
-            if type(self[key]).__name__ == 'str':
+            elif type(self[key]).__name__ == 'str':
                 string = ';'.join((string, self[key]))
             #if its an integet, fomate it and join it to the output string
             elif type(self[key]).__name__ == 'int':
-                string = ';'.join((string, '%d' % self.__orderData[key]))
+                string = ';'.join((string, '%d' % self[key]))
             #if anything else, join N/A
             else:
                 string = ';'.join((string, 'N/A'))
@@ -145,4 +148,12 @@ class ProductOrder:
         '''
         Check the validity of a product order.
         '''
+        validity = True
+        #look for None data, and 0 quantity
+        for key in self.KEYS:
+            if self.__orderData[key] == None or \
+                        (key == self.QTY_TO_ORDER_KEY and 
+                         self.__orderData[key] == 0):
+                validity = False
+        return validity
             
