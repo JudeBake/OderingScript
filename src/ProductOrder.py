@@ -32,11 +32,11 @@ class ProductOrder:
         - Convert ProductOrder to String
         - Compare ProductOrder by returning the number of days between orders
     '''
-    PROD_NB_KEY = "no. produit"
+    PROD_NB_KEY = "productNb"
     DESC_KEY = "description"
-    QTY_TO_ORDER_KEY = "quantite"
+    QTY_TO_ORDER_KEY = "qtyToOrder"
     DATE_KEY = "date"
-    EMPLOYEE_KEY = "commis"
+    EMPLOYEE_KEY = "employee"
     KEYS = (PROD_NB_KEY, DESC_KEY, QTY_TO_ORDER_KEY, DATE_KEY, EMPLOYEE_KEY)
     ROWS = (0, 1, 2, 3)
 
@@ -61,6 +61,7 @@ class ProductOrder:
         try:
             dateValues = list(datePaturn.search(string).groups())
         except:
+            #raise an error
             dateValues = list()
             pass
         #convert the string list into an integer list
@@ -74,6 +75,7 @@ class ProductOrder:
             orderDate = date(dateValues[YEAR_IDX], dateValues[MONTH_IDX],
                              dateValues[DAY_IDX])
         except:
+            #raise an error
             orderDate = None
             pass
         return orderDate
@@ -106,7 +108,10 @@ class ProductOrder:
         '''
         #if setting date field, process it into a date object befor assignation
         if key == self.DATE_KEY:
-            self.__orderData[key] = self.__computeDateString(value)
+            if type(value).__name__ == 'str':
+                self.__orderData[key] = self.__computeDateString(value)
+            else:
+                self.__orderData[key] = value
         #if other field, simply assign it
         else:
             self.__orderData[key] = value
@@ -121,23 +126,13 @@ class ProductOrder:
         '''
         Construct and return a string from the data of the product order.
         Return an empty string if no data or incomplete data.
-        The string returned doesn't contain the date.
+        The string returned doesn't contain the date nor the employee.
         '''
         string = ''
-        for key in self.KEYS:
-            #if the field is empty, join N/A
-            if self[key] == None:
-                string = ';'.join((string, 'N/A'))
-            #if the field is a string, simply join it to the output
-            elif type(self[key]).__name__ == 'str' and self.__orderData[key]:
-                string = ';'.join((string, self[key]))
-            #if its an integet, fomate it and join it to the output string
-            elif type(self[key]).__name__ == 'int' and self.__orderData[key]:
-                string = ';'.join((string, '%d' % self[key]))
-            #if anything else, join N/A
-            else:
-                string = ';'.join((string, 'N/A'))
-                
+        string = ' '.join((string, str(self[self.QTY_TO_ORDER_KEY]) + ' X'))
+        string = ' '.join((string, str(self[self.PROD_NB_KEY])))
+        string = ' '.join((string, self[self.DESC_KEY]))
+        string = string.lstrip()
         return string
     
     def deltaProductOrder(self, productOrder):

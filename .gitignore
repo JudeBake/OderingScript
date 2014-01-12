@@ -1,3 +1,4 @@
 __pycache__
 .settings
 test_files
+/src/*.pyc

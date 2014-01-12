@@ -4,6 +4,7 @@ Created on 2014-01-09
 @author: julienbacon
 '''
 
+from datetime import date
 from ProductOrder import ProductOrder
 import unittest
 
@@ -48,13 +49,14 @@ class QtyToOrderSetterGetterTest(unittest.TestCase):
             
 class DateSetterGetterTest(unittest.TestCase):
     TEST_VALUE = (('01/01/01', '01/01/01'), ('31/12/2014', '31/12/14'),
-                  ('15/06/10', '15/06/10'), ('27/07/3333', '27/07/33'))
+                  ('15/06/10', '15/06/10'), ('27/07/3333', '27/07/33'),
+                  (date(1900, 2, 3), '03/02/00'))
     __productOrder= ProductOrder()
     
     def testDateSetterAndGetter(self):
         '''
         ProductOrder must be able to set and get its date field.
-            - input string format: dd/mm/yy or dd/mm/yyyy.
+            - input string format: dd/mm/yy or dd/mm/yyyy or date object.
             - output string format: dd/mm/yy
         '''
         for value, attendedResult in self.TEST_VALUE:
@@ -92,8 +94,8 @@ class CmpProductOrderTest(unittest.TestCase):
             self.assertEqual(result, attendedResult, 'ProductOrder failed to figure if it orders the same product than an other ProductOrder')
             
 class ProductOrderStrGetterTest(unittest.TestCase):
-    TEST_VALUE = ((133658, 'abcd', 100, '13/10/37', 'jb', ';133658;abcd;100;13/10/37;jb'),
-                  (103800, 'gdtkcvyl', 753, '01/05/14', None, ';103800;gdtkcvyl;753;01/05/14;N/A'))
+    TEST_VALUE = ((133658, 'abcd', 100, '13/10/37', 'jb', '100 X 133658 abcd'),
+                  (103800, 'gdtkcvyl', 753, '01/05/14', None, '753 X 103800 gdtkcvyl'))
     __productOrder = ProductOrder()
     
     def testProductOrderStrGetter(self):
@@ -136,6 +138,7 @@ class ValifityGetterTest(unittest.TestCase):
                       (133025, 'afeoboi', 25, '01/01/01', None, False),
                       (None, 'aibef', 25, '01/01/01/01', 'Daniel', False),
                       (123945, 'eouty', 0, '10/10/10', 'jb', False),
+                      (124666, 'jafoe;', 100, None, 'jb', False),
                       (133045, 'aiefo', 3, '01/01/01', 'Daniel', True))
     __productOrder = ProductOrder()
     
