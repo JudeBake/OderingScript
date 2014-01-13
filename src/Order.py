@@ -41,7 +41,7 @@ class Order:
     __EMPLOYEE_TITLE = 'commis'
     __TITLE_MAP = (__PROD_NB_TITLE, __DESC_TITLE, __QTY_TITLE, __DATE_TILE,
                    __EMPLOYEE_TITLE)
-    __EOD_ROW_MARKER = 'EOD'
+    __ADMIN_EMPLOYEE = 'jf admin'
     
     def __colMapping(self, sheet):
         #parse the col. to figure which one has what data
@@ -81,21 +81,25 @@ class Order:
                 if withDateFlag:
                     (prodNbCol, qtyCol, descCol, dateCol, employeeCol) = orderBloc
                     if sheet.cell(row, qtyCol).ctype == XL_CELL_TEXT:
-                        prodOrder[ProductOrder.DATE_KEY] = \
-                            str(sheet.cell(row, dateCol).value)
+                        try:
+                            prodOrder[ProductOrder.DATE_KEY] = \
+                                str(sheet.cell(row, dateCol).value)
+                        except:
+                            #put in the log file
+                            pass
                 else:
                     (prodNbCol, qtyCol, descCol, employeeCol) = orderBloc
+                    prodOrder[ProductOrder.DATE_KEY] = currentDate
                 if sheet.cell(row, prodNbCol).ctype == XL_CELL_NUMBER:
                     prodOrder[ProductOrder.PROD_NB_KEY] = \
                         int(sheet.cell(row, prodNbCol).value)
                 if sheet.cell(row, qtyCol).ctype == XL_CELL_NUMBER:
                     prodOrder[ProductOrder.QTY_TO_ORDER_KEY] = \
                         int(sheet.cell(row, qtyCol).value)
-                if sheet.cell(row, qtyCol).ctype == XL_CELL_TEXT:
+                if sheet.cell(row, descCol).ctype == XL_CELL_TEXT:
                     prodOrder[ProductOrder.DESC_KEY] = \
                         str(sheet.cell(row, descCol).value)
-                    prodOrder[ProductOrder.DATE_KEY] = currentDate
-                if sheet.cell(row, qtyCol).ctype == XL_CELL_TEXT:
+                if sheet.cell(row, employeeCol).ctype == XL_CELL_TEXT:
                     prodOrder[ProductOrder.EMPLOYEE_KEY] = \
                         str(sheet.cell(row, employeeCol).value)
                 self.__oderList.append(prodOrder)
@@ -133,6 +137,12 @@ class Order:
         self.__processLoading(sheet, withDateFlag)
         book.release_resources()
         
+    def append(self, prodOrder):
+        '''
+        Append a ProductOrder
+        '''
+        self.__oderList.append(prodOrder)
+        
     def popLeft(self):
         '''
         Pop left the ProductOrder list.
@@ -144,5 +154,44 @@ class Order:
         Pop right th ProductOrder list.
         '''
         return self.__oderList.pop()
-        
+    
+    def filter(self, ordered):
+        '''
+        Filter bad and already ordered ProductOrder.
+        Filters are:
+            - bad ProductOrder.
+            - Already Ordered in the last 20 days ProductOrder, except if employee is the admin.
+        '''
+        filteredProdOrder = list()
+        #filter the bad productOrder
+        for prodOrder in self.__oderList:
+            if not prodOrder.isValid():
+                filteredProdOrder.append(prodOrder)
+        #filter already ordered
+        for prodOrder in self.__oderList:
+            for oldOrder in ordered.getOrderList():
+                if prodOrder == oldOrder and \
+                        -20 < prodOrder.deltaProductOrder(oldOrder) < 20 and \
+                        prodOrder[ProductOrder.EMPLOYEE_KEY] != self.__ADMIN_EMPLOYEE:
+                    filteredProdOrder.append(prodOrder)
+        #remove the ProductOrder filtered
+        for prodOrder in filteredProdOrder:
+            self.__oderList.remove(prodOrder)
+            
+    def getOrderList(self):
+        '''
+        Get the whole ProductOrder list.
+        '''
+        return self.__oderList
+    
+    def clear(self):
+        '''
+        Clear the order
+        '''
+        self.__oderList.clear()
+    
+    def save(self, destinationFile):
+        '''
+        Save the order data to the destination file
+        '''
         

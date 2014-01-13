@@ -139,7 +139,7 @@ class ProductOrder:
         return (self.__orderData[ProductOrder.DATE_KEY] - 
                 productOrder.__orderData[ProductOrder.DATE_KEY]).days
                 
-    def ProductOrederIsValid(self):
+    def isValid(self):
         '''
         Check the validity of a product order.
         '''
