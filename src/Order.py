@@ -80,7 +80,7 @@ class Order:
                 prodOrder = ProductOrder()
                 if withDateFlag:
                     (prodNbCol, qtyCol, descCol, dateCol, employeeCol) = orderBloc
-                    if sheet.cell(row, qtyCol).ctype == XL_CELL_TEXT:
+                    if sheet.cell(row, dateCol).ctype == XL_CELL_TEXT:
                         try:
                             prodOrder[ProductOrder.DATE_KEY] = \
                                 str(sheet.cell(row, dateCol).value)
@@ -167,7 +167,11 @@ class Order:
         for prodOrder in self.__oderList:
             if not prodOrder.isValid():
                 filteredProdOrder.append(prodOrder)
+        #remove the ProductOrder filtered
+        for prodOrder in filteredProdOrder:
+            self.__oderList.remove(prodOrder)
         #filter already ordered
+        filteredProdOrder = list()
         for prodOrder in self.__oderList:
             for oldOrder in ordered.getOrderList():
                 if prodOrder == oldOrder and \

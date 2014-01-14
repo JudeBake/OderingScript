@@ -56,15 +56,16 @@ class OrderLoadingTest(unittest.TestCase):
         order = Order()
         order.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile2.xls'), True)
         result = []
-        for i in range(len(self.order)):
-            result.append(self.order.popRight())
+        for i in range(len(order)):
+            result.append(order.popRight())
         i = i
         self.assertListEqual(result, self.ATTENDED_RESULTS2, 'Order failed to its ProductOrder list from an excel file, get its length and popRight its whole ProductOrder list')
         
 class filterOderTest(unittest.TestCase):
     ATTENDED_RESULTS = [productOrderBuilder(203432, 'bonjour', 2000, date.today(), 'jf admin'),
+                        productOrderBuilder(240900, 'lala', 100, date.today(), 'guy'),
                         productOrderBuilder(130090, 'prout', 200, date.today(), 'jb'),
-                        productOrderBuilder(133840, 'dod', 50, date.today(), 'justin')]
+                        productOrderBuilder(133840, 'dodo', 50, date.today(), 'justin')]
     
     def testFilterOrder(self):
         '''
@@ -95,7 +96,25 @@ class clearAndSaveTest (unittest.TestCase):
         '''
         self.__originalFile1 = Order()
         self.__originalFile2 = Order()
-        self.__originalFile1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTest5.xls'), False)
+        self.__originalFile1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile5.xls'), False)
+        self.__originalFile2.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile6.xls'), True)
+        self.__attendedResult = Order()
+        for prodOrder in self.__originalFile2.getOrderList():
+            self.__attendedResult1.append(prodOrder)
+        for prodOrder in self.__originalFile1.getOrderList():
+            self.__attendedResult1.append(prodOrder)
+            
+    def teardown(self):
+        '''
+        Reset initial state of the test files.
+        '''
+        self.__originalFile1.save(os.path.join(TEST_FILE_ROOT, 'OrderTestFile5.xls'))
+        self.__originalFile2.save(os.path.join(TEST_FILE_ROOT, 'OrderTestFile6.xls'))
+        
+    def testClearAndSave(self):
+        '''
+        Order must be able to clear and save itself.
+        '''
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

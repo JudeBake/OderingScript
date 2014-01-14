@@ -49,15 +49,15 @@ class QtyToOrderSetterGetterTest(unittest.TestCase):
             self.assertEqual(result, value, 'ProductOrder failed to set and get its quantity to order field.')
             
 class DateSetterGetterTest(unittest.TestCase):
-    TEST_VALUE = (('01/01/01', '01/01/01'), ('31/12/2014', '31/12/14'),
-                  ('15/06/10', '15/06/10'), ('27/07/3333', '27/07/33'),
-                  (date(1900, 2, 3), '03/02/00'))
+    TEST_VALUE = (('01/01/01', '01/01/2001'), ('31/12/2014', '31/12/2014'),
+                  ('15/06/10', '15/06/2010'), ('27/07/3333', '27/07/3333'),
+                  (date(1900, 2, 3), '03/02/1900'))
     
     def testDateSetterAndGetter(self):
         '''
         ProductOrder must be able to set and get its date field.
             - input string format: dd/mm/yy or dd/mm/yyyy or date object.
-            - output string format: dd/mm/yy
+            - output string format: dd/mm/yyyy
         '''
         prodOrder = ProductOrder()
         for value, attendedResult in self.TEST_VALUE:

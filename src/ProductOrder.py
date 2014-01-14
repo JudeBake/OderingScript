@@ -92,11 +92,11 @@ class ProductOrder:
     def __getitem__(self, key):
         '''
         Wrapper of dict["key"]
-        For the date field the return is a string in the format dd/mm/yy.
+        For the date field the return is a string in the format dd/mm/yyyy.
         '''
         #if date field is asked, return it in string of the format dd/mm/yy
         if key == self.DATE_KEY and self.__orderData[key]:
-            return self.__orderData[key].strftime("%d/%m/%y")
+            return self.__orderData[key].strftime("%d/%m/%Y")
         #if other field, simply return it as is
         else:
             return self.__orderData[key]
