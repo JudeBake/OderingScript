@@ -5,10 +5,8 @@ Created on 2014-01-09
 '''
 
 from collections import deque
-from datetime import date
 from ProductOrder import ProductOrder
-import os
-from xlrd import open_workbook, XL_CELL_EMPTY, XL_CELL_TEXT, XL_CELL_NUMBER
+from xlrd import open_workbook, XL_CELL_TEXT, XL_CELL_NUMBER
 from xlwt import Workbook, easyxf
 
 class OrderError(Exception):
