@@ -9,8 +9,7 @@ from datetime import date
 from ProductOrder import ProductOrder
 import os
 from xlrd import open_workbook, XL_CELL_EMPTY, XL_CELL_TEXT, XL_CELL_NUMBER
-import xlutils
-from xlwt import Workbook
+from xlwt import Workbook, easyxf
 
 class OrderError(Exception):
     '''
@@ -29,8 +28,6 @@ class Order:
         - Get the ProductOrder list.
         - Get one ProductOrder.
     '''
-    __DAILY_ORDER_SH_NAME = 'dailyOrder'
-    __ORDERED_SH_NAME = 'ordere'
     __TITLE_ROW = 0
     __1ST_DATA_ROW = 1
     __LAST_DATA_ROW = 13
@@ -39,9 +36,10 @@ class Order:
     __QTY_TITLE = 'quantite'
     __DATE_TILE = 'date'
     __EMPLOYEE_TITLE = 'commis'
-    __TITLE_MAP = (__PROD_NB_TITLE, __DESC_TITLE, __QTY_TITLE, __DATE_TILE,
+    __TITLE_MAP = (__PROD_NB_TITLE, __QTY_TITLE, __DESC_TITLE, __DATE_TILE,
                    __EMPLOYEE_TITLE)
     __ADMIN_EMPLOYEE = 'jf admin'
+    __INSTRUCTION_STR = 'NE PAS ECRIRE EN-DESSOUS DE LA LIGNE ROUGE'
     
     def __colMapping(self, sheet):
         #parse the col. to figure which one has what data
@@ -70,26 +68,21 @@ class Order:
             self.__rowMap.append(tempList)
             tempList = list()
     
-    def __processLoading(self, sheet, withDateFlag):
+    def __processLoading(self, sheet):
         #for each order bloc, load the data
         for orderBloc in self.__colMap:
             #if there's a date in the file, construct the order list with the
             #date from the file
-            currentDate = date.today()
             for row in self.__rowMap.popleft():
                 prodOrder = ProductOrder()
-                if withDateFlag:
-                    (prodNbCol, qtyCol, descCol, dateCol, employeeCol) = orderBloc
-                    if sheet.cell(row, dateCol).ctype == XL_CELL_TEXT:
-                        try:
-                            prodOrder[ProductOrder.DATE_KEY] = \
-                                str(sheet.cell(row, dateCol).value)
-                        except:
-                            #put in the log file
-                            pass
-                else:
-                    (prodNbCol, qtyCol, descCol, employeeCol) = orderBloc
-                    prodOrder[ProductOrder.DATE_KEY] = currentDate
+                (prodNbCol, qtyCol, descCol, dateCol, employeeCol) = orderBloc
+                if sheet.cell(row, dateCol).ctype == XL_CELL_TEXT:
+                    try:
+                        prodOrder[ProductOrder.DATE_KEY] = \
+                            str(sheet.cell(row, dateCol).value)
+                    except:
+                        #put in the log file
+                        pass
                 if sheet.cell(row, prodNbCol).ctype == XL_CELL_NUMBER:
                     prodOrder[ProductOrder.PROD_NB_KEY] = \
                         int(sheet.cell(row, prodNbCol).value)
@@ -109,7 +102,7 @@ class Order:
         Constructor
         '''
         self.__oderList = deque()
-        self.__colMap = []
+        self.__colMap = deque()
         self.__rowMap = deque()
         
     def __len__(self):
@@ -118,7 +111,7 @@ class Order:
         '''
         return len(self.__oderList)
         
-    def loadOrder(self, sourceFile, withDateFlag = False):
+    def loadOrder(self, sourceFile):
         '''
         Load an Order in read only mode.
         '''
@@ -134,7 +127,7 @@ class Order:
         self.__colMapping(sheet)
         self.__rowMapping(sheet)
         #process the data
-        self.__processLoading(sheet, withDateFlag)
+        self.__processLoading(sheet)
         book.release_resources()
         
     def append(self, prodOrder):
@@ -193,9 +186,75 @@ class Order:
         Clear the order
         '''
         self.__oderList.clear()
+        
+    def __newOrderBloc(self, sheet, cols):
+        (prodNbCol, qtyCol, descCol, dateCol, employeeCol) = cols
+        for title in self.__TITLE_MAP:
+            if title == self.__PROD_NB_TITLE:
+                sheet.write(self.__TITLE_ROW, prodNbCol, title,
+                            easyxf('alignment: horizontal center;'))
+            if title == self.__QTY_TITLE:
+                sheet.write(self.__TITLE_ROW, qtyCol, title,
+                            easyxf('alignment: horizontal center;'))
+            elif title == self.__DESC_TITLE:
+                sheet.write(self.__TITLE_ROW, descCol, title,
+                            easyxf('alignment: horizontal center;'))
+            elif title == self.__DATE_TILE:
+                sheet.write(self.__TITLE_ROW, dateCol, title,
+                            easyxf('alignment: horizontal center;'))
+            elif title == self.__EMPLOYEE_TITLE:
+                sheet.write(self.__TITLE_ROW, employeeCol, title,
+                            easyxf('alignment: horizontal center;'))
     
     def save(self, destinationFile):
         '''
         Save the order data to the destination file
         '''
+        newWorkBook = Workbook()
+        sheet = newWorkBook.add_sheet('Feuille1')
+        
+        #setup the first bloc of title and the instruction at the end.
+        orderBloc = range(len(self.__TITLE_MAP))
+        orderBlocCmpt = 0
+        self.__newOrderBloc(sheet, orderBloc)
+        sheet.row(self.__LAST_DATA_ROW + 1).set_style(easyxf('pattern: pattern solid, fore_colour red;'))
+        sheet.write(self.__LAST_DATA_ROW + 2, 0, self.__INSTRUCTION_STR,
+                    easyxf('font: bold True;'))
+        row = self.__1ST_DATA_ROW
+        for prodOrder in self.__oderList:
+            for col in orderBloc:
+                if self.__TITLE_MAP[col - \
+                                    (orderBlocCmpt * (len(orderBloc) + 1))] \
+                                     == self.__PROD_NB_TITLE:
+                    sheet.row(row).set_cell_number(col,
+                                    prodOrder[ProductOrder.PROD_NB_KEY])
+                elif self.__TITLE_MAP[col - \
+                                    (orderBlocCmpt * (len(orderBloc) + 1))] \
+                                     == self.__QTY_TITLE:
+                    sheet.row(row).set_cell_number(col,
+                                    prodOrder[ProductOrder.QTY_TO_ORDER_KEY])
+                elif self.__TITLE_MAP[col - \
+                                    (orderBlocCmpt * (len(orderBloc) + 1))] \
+                                     == self.__DESC_TITLE:
+                    sheet.row(row).set_cell_text(col,
+                                    prodOrder[ProductOrder.DESC_KEY])
+                elif self.__TITLE_MAP[col - \
+                                    (orderBlocCmpt * (len(orderBloc) + 1))] \
+                                     == self.__DATE_TILE:
+                    sheet.row(row).set_cell_text(col,
+                                    prodOrder[ProductOrder.DATE_KEY])
+                elif self.__TITLE_MAP[col - \
+                                    (orderBlocCmpt * (len(orderBloc) + 1))] \
+                                     == self.__EMPLOYEE_TITLE:
+                    sheet.row(row).set_cell_text(col,
+                                    prodOrder[ProductOrder.EMPLOYEE_KEY])
+            row += 1
+            if row > self.__LAST_DATA_ROW:
+                row = self.__1ST_DATA_ROW
+                orderBloc = [col + len(orderBloc) + 1 for col in orderBloc]
+                orderBlocCmpt += 1
+                self.__newOrderBloc(sheet, orderBloc)
+        #save the updated file
+        newWorkBook.save(destinationFile)
+        
         

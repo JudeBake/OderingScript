@@ -22,50 +22,31 @@ def productOrderBuilder(prodNb, desc, qty, date, employee):
     return prodOrder
     
 class OrderLoadingTest(unittest.TestCase):
-    ATTENDED_RESULTS1 = [productOrderBuilder(133045, 'allo', 100, date.today(), 'jb'),
-                         productOrderBuilder(203432, 'bonjour', 2000, date.today(), 'jf'),
-                         productOrderBuilder(130090, '', None, date.today(), ''),
-                         productOrderBuilder(133840, 'dodo', 50, date.today(), 'justin'),
-                         productOrderBuilder(130050, 'coucou', None, date.today(), 'Daniel'),
-                         productOrderBuilder(None, '', 200, date.today(), '')]
-    ATTENDED_RESULTS2 = [productOrderBuilder(None, '', 200, date(1232, 4, 13), ''),
+    ATTENDED_RESULTS = [productOrderBuilder(None, None, 200, date(1232, 4, 13), None),
                          productOrderBuilder(130050, 'coucou', None, date(1231, 4, 13), 'Daniel'),
                          productOrderBuilder(133840, 'dodo', 50, date(1201, 1, 1), 'justin'),
-                         productOrderBuilder(130090, '', None, date(1201, 1, 1), ''),
+                         productOrderBuilder(130090, None, None, None, None),
                          productOrderBuilder(203432, 'bonjour', 2000, date(1201, 1, 1), 'jf'),
                          productOrderBuilder(133045, 'allo', 100, date(1201, 1, 1), 'jb')]
-
-    def testOrderWODateLoading(self):
-        '''
-        Order must be able to load its ProductOrders from an excel file without
-        the date in it, get its length and pop left its whole ProductOrder list.
-        '''
-        order = Order()
-        order.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile1.xls'), False)
-        result = []
-        for i in range(len(order)):
-            result.append(order.popLeft())
-        i = i
-        self.assertListEqual(result, self.ATTENDED_RESULTS1, 'Order failed to its ProductOrder list from an excel file, get its length and popLeft its whole ProductOrder list')
         
-    def testOrderWDateLoading(self):
+    def testOrderLoading(self):
         '''
-        Order must be able to load its ProductOrders from an excel file wit
-        the date in it, get its length and pop right its whole ProductOrder list.
+        Order must be able to load its ProductOrders from an excel file, get its
+        length and pop right its whole ProductOrder list.
         '''
         order = Order()
-        order.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile2.xls'), True)
+        order.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile1.xls'))
         result = []
         for i in range(len(order)):
             result.append(order.popRight())
         i = i
-        self.assertListEqual(result, self.ATTENDED_RESULTS2, 'Order failed to its ProductOrder list from an excel file, get its length and popRight its whole ProductOrder list')
+        self.assertListEqual(result, self.ATTENDED_RESULTS, 'Order failed to its ProductOrder list from an excel file, get its length and popRight its whole ProductOrder list')
         
 class filterOderTest(unittest.TestCase):
-    ATTENDED_RESULTS = [productOrderBuilder(203432, 'bonjour', 2000, date.today(), 'jf admin'),
-                        productOrderBuilder(240900, 'lala', 100, date.today(), 'guy'),
-                        productOrderBuilder(130090, 'prout', 200, date.today(), 'jb'),
-                        productOrderBuilder(133840, 'dodo', 50, date.today(), 'justin')]
+    ATTENDED_RESULTS = [productOrderBuilder(203432, 'bonjour', 2000, date(2014, 1, 14), 'jf admin'),
+                        productOrderBuilder(240900, 'lala', 100, date(2014, 1, 14), 'guy'),
+                        productOrderBuilder(130090, 'prout', 200, date(2014, 1, 14), 'jb'),
+                        productOrderBuilder(133840, 'dodo', 50, date(2014, 1, 14), 'justin')]
     
     def testFilterOrder(self):
         '''
@@ -77,8 +58,8 @@ class filterOderTest(unittest.TestCase):
         '''
         order1 = Order()
         order2 = Order()
-        order1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile3.xls'), False)
-        order2.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile4.xls'), True)
+        order1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile2.xls'))
+        order2.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile3.xls'))
         order1.filter(order2)
         result = []
         for i in range(len(order1)):
@@ -87,34 +68,55 @@ class filterOderTest(unittest.TestCase):
         self.assertListEqual(result, self.ATTENDED_RESULTS, 'Order failed to filter and remove the bad and already ordered ProductOrder.')
         
 class clearAndSaveTest (unittest.TestCase):
-    ATTENDED_RESULTS = []
     
-    def setup(self):
+    def setUp(self):
         '''
-        Setup the test case by loading the contant of the files for restoration
-        at teardown.
+        Setup the test case by loading the contant of the files to process the
+        attended result.
         '''
         self.__originalFile1 = Order()
         self.__originalFile2 = Order()
-        self.__originalFile1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile5.xls'), False)
-        self.__originalFile2.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile6.xls'), True)
-        self.__attendedResult = Order()
-        for prodOrder in self.__originalFile2.getOrderList():
-            self.__attendedResult1.append(prodOrder)
+        self.__originalFile1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile4.xls'))
+        self.__originalFile2.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile5.xls'))
+        self.__attendedResult2 = []
         for prodOrder in self.__originalFile1.getOrderList():
-            self.__attendedResult1.append(prodOrder)
+            self.__originalFile2.append(prodOrder)
+        for prodOrder in self.__originalFile2.getOrderList():
+            self.__attendedResult2.append(prodOrder)
             
-    def teardown(self):
+    def tearDown(self):
         '''
-        Reset initial state of the test files.
+        Deleted the new files.
         '''
-        self.__originalFile1.save(os.path.join(TEST_FILE_ROOT, 'OrderTestFile5.xls'))
-        self.__originalFile2.save(os.path.join(TEST_FILE_ROOT, 'OrderTestFile6.xls'))
+        os.remove(os.path.join(TEST_FILE_ROOT, 'OrderTestFile6.xls'))
+        os.remove(os.path.join(TEST_FILE_ROOT, 'OrderTestFile7.xls'))
         
     def testClearAndSave(self):
         '''
         Order must be able to clear and save itself.
         '''
+        order1 = Order()
+        order2 = Order()
+        order1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile4.xls'))
+        order2.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile5.xls'))
+        for i in range(len(order1)):
+            order2.append(order1.popLeft())
+        i = i
+        order1.clear()
+        order1.save(os.path.join(TEST_FILE_ROOT, 'OrderTestFile6.xls'))
+        order2.save(os.path.join(TEST_FILE_ROOT, 'OrderTestFile7.xls'))
+        resultOrder1 = Order()
+        resultOrder2 = Order()
+        resultOrder1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile6.xls'))
+        resultOrder2.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile7.xls'))
+        result1 = []
+        result2 = []
+        for prodOrder in resultOrder1.getOrderList():
+            result1.append(prodOrder)
+        for prodOrder in resultOrder2.getOrderList():
+            result2.append(prodOrder)
+        self.assertListEqual(result1, [], 'Order failed to clear itself.')
+        self.assertListEqual(result2, self.__attendedResult2, 'Order failed to save itself.')
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
