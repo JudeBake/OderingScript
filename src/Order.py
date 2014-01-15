@@ -17,14 +17,16 @@ class OrderError(Exception):
 class Order:
     '''
     Order is a list of ProductOrders.
-    It creates its list from an excel file. If the file was not modify earlier
-    than yesterday, Order assumes that there's nothing new to order.
+    It creates its list from an excel file.
     
     It give the following interaces:
         - Load the ProductOrder from an excel file in read only or read/write mode.
         - Append one ProductOrder.
         - Get the ProductOrder list.
-        - Get one ProductOrder.
+        - Pop left or right a ProductOrder.
+        - Filter the ProductOrder from previously made orders and invalid ones.
+        - Clear its ProductOrder list.
+        - Save its ProductOrder list to an excel file.
     '''
     __TITLE_ROW = 0
     __1ST_DATA_ROW = 1
