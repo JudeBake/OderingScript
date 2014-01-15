@@ -19,7 +19,7 @@ class Order:
     Order is a list of ProductOrders.
     It creates its list from an excel file.
     
-    It give the following interaces:
+    It give the following interfaces:
         - Load the ProductOrder from an excel file in read only or read/write mode.
         - Append one ProductOrder.
         - Get the ProductOrder list.
