@@ -76,25 +76,36 @@ class Order:
             for row in self.__rowMap.popleft():
                 prodOrder = ProductOrder()
                 (prodNbCol, qtyCol, descCol, dateCol, employeeCol) = orderBloc
-                if sheet.cell(row, dateCol).ctype == XL_CELL_TEXT:
-                    try:
-                        prodOrder[ProductOrder.DATE_KEY] = \
-                            str(sheet.cell(row, dateCol).value)
-                    except:
-                        #put in the log file
-                        pass
-                if sheet.cell(row, prodNbCol).ctype == XL_CELL_NUMBER:
+                try:
+                    prodOrder[ProductOrder.DATE_KEY] = \
+                        str(sheet.cell(row, dateCol).value)
+                except:
+                    prodOrder[ProductOrder.DATE_KEY] = None
+                    pass
+                try:
                     prodOrder[ProductOrder.PROD_NB_KEY] = \
                         int(sheet.cell(row, prodNbCol).value)
-                if sheet.cell(row, qtyCol).ctype == XL_CELL_NUMBER:
+                except:
+                    prodOrder[ProductOrder.PROD_NB_KEY] = None
+                    pass
+                try:
                     prodOrder[ProductOrder.QTY_TO_ORDER_KEY] = \
                         int(sheet.cell(row, qtyCol).value)
-                if sheet.cell(row, descCol).ctype == XL_CELL_TEXT:
+                except:
+                    prodOrder[ProductOrder.QTY_TO_ORDER_KEY] = None
+                    pass
+                try:
                     prodOrder[ProductOrder.DESC_KEY] = \
                         str(sheet.cell(row, descCol).value)
-                if sheet.cell(row, employeeCol).ctype == XL_CELL_TEXT:
+                except:
+                    prodOrder[ProductOrder.DESC_KEY] = None
+                    pass
+                try:
                     prodOrder[ProductOrder.EMPLOYEE_KEY] = \
                         str(sheet.cell(row, employeeCol).value)
+                except:
+                    prodOrder[ProductOrder.EMPLOYEE_KEY] = None
+                    pass
                 self.__oderList.append(prodOrder)
     
     def __init__(self):

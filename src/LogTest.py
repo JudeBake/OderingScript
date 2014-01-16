@@ -41,7 +41,9 @@ class outputLogTest(unittest.TestCase):
         log.outputLog(TEST_FILE_ROOT)
         f = open(os.path.join(TEST_FILE_ROOT, 'Log_' + currentDate.strftime('%d-%m-%Y') + '.txt'), 'r')
         result = f.readlines()
-        self.assertListEqual(result, self.TEST_VALUES, 'log isn\'t able to output its message list.')
+        f.close()
+        attendedResult = [msg + '\n' for msg in self.TEST_VALUES]
+        self.assertListEqual(result, attendedResult, 'log isn\'t able to output its message list.')
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

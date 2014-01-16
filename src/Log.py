@@ -43,7 +43,7 @@ class Log:
         logFile = open(os.path.join(destinationPath, 'Log_' + \
                                     currentDate.strftime('%d-%m-%Y')) +'.txt', 'w+')
         for msg in self.__msgList:
-            logFile.write(msg + '\n\r')
+            logFile.write(msg + '\n')
         logFile.flush()
         logFile.close()
         
