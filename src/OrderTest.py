@@ -68,7 +68,10 @@ class filterOderTest(unittest.TestCase):
     ATTENDED_RESULTS = [productOrderBuilder('203432', 'bonjour', 2000, date(2014, 1, 14), 'jf admin'),
                         productOrderBuilder('240900', 'lala', 100, date(2014, 1, 14), 'guy'),
                         productOrderBuilder('130090', 'prout', 200, date(2014, 1, 14), 'jb'),
-                        productOrderBuilder('133840', 'dodo', 50, date(2014, 1, 14), 'justin')]
+                        productOrderBuilder('033840', 'dodo', 50, date(2014, 1, 14), 'justin')]
+    ATTENDED_LOG = ['None X 130050 coucou n\'a pas ete commande a cause d\'information incomplete.',
+                    '200 X   n\'a pas ete commande a cause d\'information incomplete.',
+                    '100 X 133045 allo n\'a pas ete commande a cause d\'une commande datant de moins de 20 jours.']
     
     def testFilterOrder(self):
         '''
@@ -89,6 +92,19 @@ class filterOderTest(unittest.TestCase):
             result.append(order1.popLeft())
         i = i
         self.assertListEqual(result, self.ATTENDED_RESULTS, 'Order failed to filter and remove the bad and already ordered ProductOrder.')
+        
+    def testFilterLogging(self):
+        '''
+        Order must log the ProductOrder that was filtered and the reson why thy were
+        filtered.
+        '''
+        log =Log()
+        order1 = Order(log)
+        order2 = Order(log)
+        order1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile2.xls'))
+        order2.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile3.xls'))
+        order1.filter(order2)
+        self.assertListEqual(log.getMsgList(), self.ATTENDED_LOG, 'Order failed to log the filtered ProductOrder.')
         
 class clearAndSaveTest (unittest.TestCase):
     

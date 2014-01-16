@@ -188,6 +188,7 @@ class Order:
         #remove the ProductOrder filtered
         for prodOrder in filteredProdOrder:
             self.__oderList.remove(prodOrder)
+            self.__outputLog.logMsg(prodOrder.getProductOrderStr() + ' n\'a pas ete commande a cause d\'information incomplete.')
         #filter the duplicates
         del filteredProdOrder
         filteredProdOrder = list()
@@ -218,6 +219,7 @@ class Order:
         #remove the ProductOrder filtered
         for prodOrder in filteredProdOrder:
             self.__oderList.remove(prodOrder)
+            self.__outputLog.logMsg(prodOrder.getProductOrderStr() + ' n\'a pas ete commande a cause d\'une commande datant de moins de 20 jours.')
             
     def getOrderList(self):
         '''

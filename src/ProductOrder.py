@@ -130,7 +130,7 @@ class ProductOrder:
         '''
         string = ''
         string = ' '.join((string, str(self[self.QTY_TO_ORDER_KEY]) + ' X'))
-        string = ' '.join((string, str(self[self.PROD_NB_KEY])))
+        string = ' '.join((string, self[self.PROD_NB_KEY]))
         string = ' '.join((string, self[self.DESC_KEY]))
         string = string.lstrip()
         return string
