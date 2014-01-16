@@ -8,11 +8,26 @@ from collections import deque
 from ProductOrder import ProductOrder
 from xlrd import open_workbook
 from xlwt import Workbook, easyxf
-
-class OrderError(Exception):
+    
+class sourceFileDontExist(Exception):
     '''
-    Base exception for Order
+    Source file used for loading doesn't exist.
     '''
+    def __init__(self, msg):
+        super(sourceFileDontExist).__init__(type(self))
+        self.__msg = msg + ' source file for loading doesn\'t exist.'
+    def __str__(self):
+        return self.__msg
+    
+class emptyOrder(Exception):
+    '''
+    Source file used for loading doesn't exist.
+    '''
+    def __init__(self, msg):
+        super(sourceFileDontExist).__init__(type(self))
+        self.__msg = msg + ' is an empty order.'
+    def __str__(self):
+        return self.__msg
 
 class Order:
     '''
@@ -81,7 +96,6 @@ class Order:
                         str(sheet.cell(row, dateCol).value)
                 except:
                     prodOrder[ProductOrder.DATE_KEY] = None
-                    pass
                 try:
                     value = str(sheet.cell(row, prodNbCol).value).split('.')
                     if len(value) > 1:
@@ -89,25 +103,21 @@ class Order:
                     prodOrder[ProductOrder.PROD_NB_KEY] = value.pop()
                 except:
                     prodOrder[ProductOrder.PROD_NB_KEY] = None
-                    pass
                 try:
                     prodOrder[ProductOrder.QTY_TO_ORDER_KEY] = \
                         int(sheet.cell(row, qtyCol).value)
                 except:
                     prodOrder[ProductOrder.QTY_TO_ORDER_KEY] = None
-                    pass
                 try:
                     prodOrder[ProductOrder.DESC_KEY] = \
                         str(sheet.cell(row, descCol).value)
                 except:
                     prodOrder[ProductOrder.DESC_KEY] = None
-                    pass
                 try:
                     prodOrder[ProductOrder.EMPLOYEE_KEY] = \
                         str(sheet.cell(row, employeeCol).value)
                 except:
                     prodOrder[ProductOrder.EMPLOYEE_KEY] = None
-                    pass
                 self.__oderList.append(prodOrder)
     
     def __init__(self, outputLog):
@@ -132,17 +142,17 @@ class Order:
         try:
             book = open_workbook(sourceFile, on_demand = True)
         except:
-            pass
+            raise sourceFileDontExist(sourceFile)
         sheet = book.sheet_by_index(0)
-        #figure if there's something new to order
-        if sheet.nrows == 1:
-            pass #raise exception
         #build the map of the data
         self.__colMapping(sheet)
         self.__rowMapping(sheet)
         #process the data
         self.__processLoading(sheet)
         book.release_resources()
+        #figure if there was data in the file, if not raise emptyOrder
+        if not self.__oderList:
+            raise emptyOrder(sourceFile)
         
     def append(self, prodOrder):
         '''

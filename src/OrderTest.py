@@ -7,7 +7,7 @@ Created on 2014-01-09
 from datetime import date
 from Log import Log
 from ProductOrder import ProductOrder
-from Order import Order
+from Order import Order, sourceFileDontExist, emptyOrder
 import os
 import unittest
 
@@ -43,6 +43,26 @@ class OrderLoadingTest(unittest.TestCase):
             result.append(order.popRight())
         i = i
         self.assertListEqual(result, self.ATTENDED_RESULTS, 'Order failed to load its ProductOrder list from an excel file, get its length and popRight its whole ProductOrder list')
+        
+    def testNoOrderFile(self):
+        '''
+        Order must raise sourceFileDontExist error when trying load an order
+        from an non-existent file.
+        '''
+        log = Log()
+        order = Order(log)
+        self.assertRaises(sourceFileDontExist, order.loadOrder,
+                          os.path.join(TEST_FILE_ROOT, 'allo.xls'))
+        
+    def testEmptyOrder(self):
+        '''
+        Order must raise an emptyOrder exception when trying to load an empty
+        order file.
+        '''
+        log = Log()
+        order = Order(log)
+        self.assertRaises(emptyOrder, order.loadOrder,
+                          os.path.join(TEST_FILE_ROOT, 'OrderTestFile8.xls'))
         
 class filterOderTest(unittest.TestCase):
     ATTENDED_RESULTS = [productOrderBuilder('203432', 'bonjour', 2000, date(2014, 1, 14), 'jf admin'),
@@ -111,7 +131,10 @@ class clearAndSaveTest (unittest.TestCase):
         order2.save(os.path.join(TEST_FILE_ROOT, 'OrderTestFile7.xls'))
         resultOrder1 = Order(self.__log)
         resultOrder2 = Order(self.__log)
-        resultOrder1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile6.xls'))
+        try:
+            resultOrder1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile6.xls'))
+        except:
+            pass
         resultOrder2.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile7.xls'))
         result1 = []
         result2 = []
