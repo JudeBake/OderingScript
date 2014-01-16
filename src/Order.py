@@ -167,6 +167,7 @@ class Order:
         Filter bad and already ordered ProductOrder.
         Filters are:
             - bad ProductOrder.
+            - duplicates.
             - Already Ordered in the last 20 days ProductOrder, except if employee is the admin.
         '''
         filteredProdOrder = list()
@@ -177,7 +178,26 @@ class Order:
         #remove the ProductOrder filtered
         for prodOrder in filteredProdOrder:
             self.__oderList.remove(prodOrder)
+        #filter the duplicates
+        del filteredProdOrder
+        filteredProdOrder = list()
+        for i in range(len(self.__oderList)):
+            instanceCmpt = 0
+            for prodOrder in self.__oderList:
+                if prodOrder == self.__oderList[i]:
+                    instanceCmpt += 1
+            if instanceCmpt > 1:
+                filteredInst = 0
+                for filteredOrder in filteredProdOrder:
+                    if self.__oderList[i] == filteredOrder:
+                        filteredInst += 1
+                if not filteredInst:
+                    filteredProdOrder.append(self.__oderList[i])
+        #remove the ProductOrder filtered
+        for prodOrder in filteredProdOrder:
+            self.__oderList.remove(prodOrder)
         #filter already ordered
+        del filteredProdOrder
         filteredProdOrder = list()
         for prodOrder in self.__oderList:
             for oldOrder in ordered.getOrderList():
