@@ -6,7 +6,7 @@ Created on 2014-01-09
 
 from collections import deque
 from ProductOrder import ProductOrder
-from xlrd import open_workbook, XL_CELL_TEXT, XL_CELL_NUMBER
+from xlrd import open_workbook
 from xlwt import Workbook, easyxf
 
 class OrderError(Exception):
@@ -83,8 +83,10 @@ class Order:
                     prodOrder[ProductOrder.DATE_KEY] = None
                     pass
                 try:
-                    prodOrder[ProductOrder.PROD_NB_KEY] = \
-                        int(sheet.cell(row, prodNbCol).value)
+                    value = str(sheet.cell(row, prodNbCol).value).split('.')
+                    if len(value) > 1:
+                        value.pop()
+                    prodOrder[ProductOrder.PROD_NB_KEY] = value.pop()
                 except:
                     prodOrder[ProductOrder.PROD_NB_KEY] = None
                     pass
@@ -108,13 +110,14 @@ class Order:
                     pass
                 self.__oderList.append(prodOrder)
     
-    def __init__(self):
+    def __init__(self, outputLog):
         '''
         Constructor
         '''
         self.__oderList = deque()
         self.__colMap = deque()
         self.__rowMap = deque()
+        self.__outputLog = outputLog
         
     def __len__(self):
         '''
@@ -237,28 +240,33 @@ class Order:
                 if self.__TITLE_MAP[col - \
                                     (orderBlocCmpt * (len(orderBloc) + 1))] \
                                      == self.__PROD_NB_TITLE:
-                    sheet.row(row).set_cell_number(col,
-                                    prodOrder[ProductOrder.PROD_NB_KEY])
+                    sheet.row(row).set_cell_text(col,
+                                    prodOrder[ProductOrder.PROD_NB_KEY],
+                                    easyxf('alignment: horizontal center;'))
                 elif self.__TITLE_MAP[col - \
                                     (orderBlocCmpt * (len(orderBloc) + 1))] \
                                      == self.__QTY_TITLE:
                     sheet.row(row).set_cell_number(col,
-                                    prodOrder[ProductOrder.QTY_TO_ORDER_KEY])
+                                    prodOrder[ProductOrder.QTY_TO_ORDER_KEY],
+                                    easyxf('alignment: horizontal center;'))
                 elif self.__TITLE_MAP[col - \
                                     (orderBlocCmpt * (len(orderBloc) + 1))] \
                                      == self.__DESC_TITLE:
                     sheet.row(row).set_cell_text(col,
-                                    prodOrder[ProductOrder.DESC_KEY])
+                                    prodOrder[ProductOrder.DESC_KEY],
+                                    easyxf('alignment: horizontal center;'))
                 elif self.__TITLE_MAP[col - \
                                     (orderBlocCmpt * (len(orderBloc) + 1))] \
                                      == self.__DATE_TILE:
                     sheet.row(row).set_cell_text(col,
-                                    prodOrder[ProductOrder.DATE_KEY])
+                                    prodOrder[ProductOrder.DATE_KEY],
+                                    easyxf('alignment: horizontal center;'))
                 elif self.__TITLE_MAP[col - \
                                     (orderBlocCmpt * (len(orderBloc) + 1))] \
                                      == self.__EMPLOYEE_TITLE:
                     sheet.row(row).set_cell_text(col,
-                                    prodOrder[ProductOrder.EMPLOYEE_KEY])
+                                    prodOrder[ProductOrder.EMPLOYEE_KEY],
+                                    easyxf('alignment: horizontal center;'))
             row += 1
             if row > self.__LAST_DATA_ROW:
                 row = self.__1ST_DATA_ROW

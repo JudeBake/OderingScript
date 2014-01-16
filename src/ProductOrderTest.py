@@ -102,7 +102,7 @@ class ProductOrderStrGetterTest(unittest.TestCase):
     def testProductOrderStrGetter(self):
         '''
         ProductOrder must be able to get a string representaion of its data
-        in the format ;productNb;description;qtyToOrder;date.
+        in the format qty X productNb description.
         '''
         for pNb, desc, qty, orderDate, empl, attendedResult in self.TEST_VALUE:
             self.prodOrder[ProductOrder.PROD_NB_KEY] = pNb

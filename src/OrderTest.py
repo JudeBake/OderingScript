@@ -5,6 +5,7 @@ Created on 2014-01-09
 '''
 
 from datetime import date
+from Log import Log
 from ProductOrder import ProductOrder
 from Order import Order
 import os
@@ -22,31 +23,32 @@ def productOrderBuilder(prodNb, desc, qty, date, employee):
     return prodOrder
     
 class OrderLoadingTest(unittest.TestCase):
-    ATTENDED_RESULTS = [productOrderBuilder(None, None, 200, date(1232, 4, 13), None),
-                         productOrderBuilder(130050, 'coucou', None, date(1231, 4, 13), 'Daniel'),
-                         productOrderBuilder(133840, 'dodo', 50, date(1201, 1, 1), 'justin'),
-                         productOrderBuilder(130090, None, None, None, None),
-                         productOrderBuilder(203432, 'bonjour', 2000, date(1201, 1, 1), 'jf'),
-                         productOrderBuilder(133045, 'allo', 100, date(1201, 1, 1), 'jb')]
+    ATTENDED_RESULTS = [productOrderBuilder('', '', 200, date(1232, 4, 13), ''),
+                         productOrderBuilder('130050', 'coucou', None, date(1231, 4, 13), 'Daniel'),
+                         productOrderBuilder('133840', 'dodo', 50, date(2001, 1, 1), 'justin'),
+                         productOrderBuilder('130090', '', None, None, ''),
+                         productOrderBuilder('203432', 'bonjour', 2000, date(2001, 1, 1), 'jf'),
+                         productOrderBuilder('133045', 'allo', 100, date(2001, 1, 1), 'jb')]
         
     def testOrderLoading(self):
         '''
         Order must be able to load its ProductOrders from an excel file, get its
         length and pop right its whole ProductOrder list.
         '''
-        order = Order()
+        log = Log()
+        order = Order(log)
         order.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile1.xls'))
         result = []
         for i in range(len(order)):
             result.append(order.popRight())
         i = i
-        self.assertListEqual(result, self.ATTENDED_RESULTS, 'Order failed to its ProductOrder list from an excel file, get its length and popRight its whole ProductOrder list')
+        self.assertListEqual(result, self.ATTENDED_RESULTS, 'Order failed to load its ProductOrder list from an excel file, get its length and popRight its whole ProductOrder list')
         
 class filterOderTest(unittest.TestCase):
-    ATTENDED_RESULTS = [productOrderBuilder(203432, 'bonjour', 2000, date(2014, 1, 14), 'jf admin'),
-                        productOrderBuilder(240900, 'lala', 100, date(2014, 1, 14), 'guy'),
-                        productOrderBuilder(130090, 'prout', 200, date(2014, 1, 14), 'jb'),
-                        productOrderBuilder(133840, 'dodo', 50, date(2014, 1, 14), 'justin')]
+    ATTENDED_RESULTS = [productOrderBuilder('203432', 'bonjour', 2000, date(2014, 1, 14), 'jf admin'),
+                        productOrderBuilder('240900', 'lala', 100, date(2014, 1, 14), 'guy'),
+                        productOrderBuilder('130090', 'prout', 200, date(2014, 1, 14), 'jb'),
+                        productOrderBuilder('133840', 'dodo', 50, date(2014, 1, 14), 'justin')]
     
     def testFilterOrder(self):
         '''
@@ -56,8 +58,9 @@ class filterOderTest(unittest.TestCase):
             - imcomplete or incoherent ProductOrder.
             - Already ordered in the last 20 days ProductOrder, except if employee is the admin.
         '''
-        order1 = Order()
-        order2 = Order()
+        log =Log()
+        order1 = Order(log)
+        order2 = Order(log)
         order1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile2.xls'))
         order2.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile3.xls'))
         order1.filter(order2)
@@ -74,8 +77,9 @@ class clearAndSaveTest (unittest.TestCase):
         Setup the test case by loading the contant of the files to process the
         attended result.
         '''
-        self.__originalFile1 = Order()
-        self.__originalFile2 = Order()
+        self.__log = Log()
+        self.__originalFile1 = Order(self.__log)
+        self.__originalFile2 = Order(self.__log)
         self.__originalFile1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile4.xls'))
         self.__originalFile2.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile5.xls'))
         self.__attendedResult2 = []
@@ -95,8 +99,8 @@ class clearAndSaveTest (unittest.TestCase):
         '''
         Order must be able to clear and save itself.
         '''
-        order1 = Order()
-        order2 = Order()
+        order1 = Order(self.__log)
+        order2 = Order(self.__log)
         order1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile4.xls'))
         order2.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile5.xls'))
         for i in range(len(order1)):
@@ -105,8 +109,8 @@ class clearAndSaveTest (unittest.TestCase):
         order1.clear()
         order1.save(os.path.join(TEST_FILE_ROOT, 'OrderTestFile6.xls'))
         order2.save(os.path.join(TEST_FILE_ROOT, 'OrderTestFile7.xls'))
-        resultOrder1 = Order()
-        resultOrder2 = Order()
+        resultOrder1 = Order(self.__log)
+        resultOrder2 = Order(self.__log)
         resultOrder1.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile6.xls'))
         resultOrder2.loadOrder(os.path.join(TEST_FILE_ROOT, 'OrderTestFile7.xls'))
         result1 = []
