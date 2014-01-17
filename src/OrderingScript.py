@@ -19,7 +19,7 @@ import os
 import winsound
 
 #add the project path to sys.path
-sys.path.append(os.path.join(os.getcwd(), 'src'))
+sys.path.append(os.path.join(os.getcwd()))
 
 from Log import Log
 from Order import Order

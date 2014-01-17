@@ -45,7 +45,7 @@ class Order:
     '''
     __TITLE_ROW = 0
     __1ST_DATA_ROW = 1
-    __LAST_DATA_ROW = 13
+    __LAST_DATA_ROW = 48
     __PROD_NB_TITLE = 'no. produit'
     __DESC_TITLE = 'description'
     __QTY_TITLE = 'quantite'
