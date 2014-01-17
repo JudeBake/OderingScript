@@ -33,7 +33,11 @@ class OrderMail:
         '''
         Generate the mail.
         '''
-        bodyStr = ''
+        bodyStr = '%2c'
         for line in self.__body:
-            bodyStr = '\n'.join(bodyStr, line)
-        os.system('thunderbird -compose \"to:\'%s\'body:\'%s\'\"' % self.__to, bodyStr)
+            bodyStr = '%0d0a'.join((bodyStr, line))
+		l = bodyStr.split(' ')
+		bodyStr = '%20'.join(l)
+        cmd = 'thunderbird -compose to=\'%s\',subject=\'commande\',body=\'%s)\'' % (self.__to, bodyStr)
+        print(cmd)
+        os.system(cmd)

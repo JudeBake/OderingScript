@@ -28,14 +28,14 @@ from OrderMail import OrderMail
 #get the files path
 dailyOrderFile = sys.argv[1]
 previousOrderFile = sys.argv[2]
-outputPath = '..\\..\\'
+outputPath = '..\\'
 audioPath = '..\\'
 
 #notify the closing of libreOffice and kill it
 a = ctypes.windll.user32.MessageBoxA(0, 'LibreOffice fermera dans 60 seconde.',
                                      '!!!Killing Notification!!!', 0)
 
-#kill LibreOffice !!!!!!!!!!!NEED TO BE MODIFIED!!!!!!!!!!!!
+#kill LibreOffice
 os.system('taskkill /f /im soffice.bin')
 
 #instanciate the log file
@@ -60,10 +60,11 @@ except:
 dailyOrder.filter(previousOrder)
 
 #generate the mail
-orderMail = OrderMail('sebastien.levesque@addison-electronique.com')
-for order in dailyOrder.getOrderList():
-    orderMail.addLineToBody(order.getProductOrderStr())
-#orderMail.generate()
+if dailyOrder.getOrderList():
+    orderMail = OrderMail('sebastien.levesque@addison-electronique.com')
+    for order in dailyOrder.getOrderList():
+        orderMail.addLineToBody(order.getProductOrderStr())
+    orderMail.generate()
 
 #transfert data to previousOrder and clean up dailyOrder
 #for i in range(len(dailyOrder)):
@@ -72,7 +73,7 @@ for order in dailyOrder.getOrderList():
 #previousOrder.save(previousOrderFile)
 
 #save the log
-#log.outputLog(outputPath)
+log.outputLog(outputPath)
 
 #notify that the mail is ready to send
 winsound.PlaySound(os.path.join(audioPath, 'orderingscript.wav'), winsound.SND_FILENAME)
