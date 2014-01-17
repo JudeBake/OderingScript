@@ -4,6 +4,8 @@ Created on 2014-01-16
 @author: julienbacon
 '''
 
+import os
+
 class OrderMail:
     '''
     OrderMail is the wrapper of the thunderbird command line interface.
@@ -31,3 +33,7 @@ class OrderMail:
         '''
         Generate the mail.
         '''
+        bodyStr = ''
+        for line in self.__body:
+            bodyStr = '\n'.join(bodyStr, line)
+        os.system('thunderbird -compose \"to:\'%s\'body:\'%s\'\"' % self.__to, bodyStr)
