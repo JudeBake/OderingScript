@@ -28,7 +28,7 @@ from OrderMail import OrderMail
 #get the files path
 dailyOrderFile = sys.argv[1]
 previousOrderFile = sys.argv[2]
-outputPath = '..\\'
+outputPath = '..\\..\\'
 audioPath = '..\\'
 
 #notify the closing of libreOffice and kill it
@@ -65,15 +65,15 @@ if dailyOrder.getOrderList():
     for order in dailyOrder.getOrderList():
         orderMail.addLineToBody(order.getProductOrderStr())
     orderMail.generate()
-
-#transfert data to previousOrder and clean up dailyOrder
-#for i in range(len(dailyOrder)):
-#    previousOrder.append(dailyOrder.popLeft())
-#dailyOrder.save(dailyOrderFile)
-#previousOrder.save(previousOrderFile)
+    
+    #transfert data to previousOrder and clean up dailyOrder
+    for i in range(len(dailyOrder)):
+        previousOrder.append(dailyOrder.popLeft())
+    dailyOrder.save(dailyOrderFile)
+    previousOrder.save(previousOrderFile)
+    
+    #notify that the mail is ready to send
+    winsound.PlaySound(os.path.join(audioPath, 'orderingscript.wav'), winsound.SND_FILENAME)
 
 #save the log
 log.outputLog(outputPath)
-
-#notify that the mail is ready to send
-winsound.PlaySound(os.path.join(audioPath, 'orderingscript.wav'), winsound.SND_FILENAME)
