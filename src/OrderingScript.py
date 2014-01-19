@@ -32,8 +32,8 @@ outputPath = '..\\..\\'
 audioPath = '..\\'
 
 #notify the closing of libreOffice and kill it
-a = ctypes.windll.user32.MessageBoxA(0, 'LibreOffice fermera dans 60 seconde.',
-                                     '!!!Killing Notification!!!', 0)
+#a = ctypes.windll.user32.MessageBoxA(0, 'LibreOffice fermera dans 60 seconde.',
+#                                     '!!!Killing Notification!!!', 0)
 
 #kill LibreOffice
 os.system('taskkill /f /im soffice.bin')
