@@ -38,5 +38,4 @@ class OrderMail:
             bodyStr = '<BR>'.join((bodyStr, line))
         bodyStr = bodyStr + '</BODY></HTML>'
         cmd = 'thunderbird -compose to=\"%s\",subject=\"A COMMANDER\",format=\"1\",body=\"%s\"' % (self.__to, bodyStr)
-        print(cmd)
         os.system(cmd)

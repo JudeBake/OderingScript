@@ -5,6 +5,7 @@ Created on 2014-01-09
 '''
 
 from collections import deque
+from datetime import date
 from ProductOrder import ProductOrder
 from xlrd import open_workbook
 from xlwt import Workbook, easyxf
@@ -258,6 +259,14 @@ class Order:
         '''
         newWorkBook = Workbook()
         sheet = newWorkBook.add_sheet('Feuille1')
+
+        #remove old product order
+        #currentDate = date.today()
+        #if len(self.__oderList) > 0:
+        #    for i in range(len(self.__oderList)):
+        #        prodOrder = self.__oderList[i]
+        #        if 30 < (prodOrder[ProductOrder.DATE_KEY] - currentDate).days < 30:
+        #            self.__orderList.remove(prodOrder)
         
         #setup the first bloc of title and the instruction at the end.
         orderBloc = range(len(self.__TITLE_MAP))
