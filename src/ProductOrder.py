@@ -136,8 +136,15 @@ class ProductOrder:
         return string
     
     def deltaProductOrder(self, productOrder):
+        '''
+        Calculate the number of days between two ProductOrders.
+        '''
         return (self.__orderData[ProductOrder.DATE_KEY] - 
                 productOrder.__orderData[ProductOrder.DATE_KEY]).days
+                
+    def getProductOrderAge(self):
+        currentDate = date.today()
+        return (self.__orderData[self.DATE_KEY] - currentDate).days
                 
     def isValid(self):
         '''

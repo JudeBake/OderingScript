@@ -5,8 +5,8 @@ Created on 2014-01-09
 '''
 
 from collections import deque
-from datetime import date
 from ProductOrder import ProductOrder
+import unicodedata
 from xlrd import open_workbook
 from xlwt import Workbook, easyxf
     
@@ -111,7 +111,8 @@ class Order:
                     prodOrder[ProductOrder.QTY_TO_ORDER_KEY] = None
                 try:
                     prodOrder[ProductOrder.DESC_KEY] = \
-                        str(sheet.cell(row, descCol).value)
+                        unicodedata.normalize('NFKD',
+                            sheet.cell(row, descCol).value).encode('ascii', 'ignore')
                 except:
                     prodOrder[ProductOrder.DESC_KEY] = None
                 try:
@@ -261,12 +262,10 @@ class Order:
         sheet = newWorkBook.add_sheet('Feuille1')
 
         #remove old product order
-        #currentDate = date.today()
-        #if len(self.__oderList) > 0:
-        #    for i in range(len(self.__oderList)):
-        #        prodOrder = self.__oderList[i]
-        #        if 30 < (prodOrder[ProductOrder.DATE_KEY] - currentDate).days < 30:
-        #            self.__orderList.remove(prodOrder)
+        if len(self.__oderList) > 0:
+            for i in range(len(self.__oderList)):
+                if 30 < self.__oderList[i].getProductOrderAge < -30:
+                    self.__orderList.remove(self.__oderList[i])
         
         #setup the first bloc of title and the instruction at the end.
         orderBloc = range(len(self.__TITLE_MAP))
