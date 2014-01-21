@@ -61,7 +61,7 @@ dailyOrder.filter(previousOrder)
 
 #generate the mail
 if dailyOrder.getOrderList():
-    orderMail = OrderMail('sebastien.levesque@addison-electronique.com')
+    orderMail = OrderMail('slevesque@addison-electronique.com', 'preynolds@addison-electronique.com;scan@addison-electronique.com')
     for order in dailyOrder.getOrderList():
         orderMail.addLineToBody(order.getProductOrderStr())
     orderMail.generate()
@@ -75,5 +75,6 @@ if dailyOrder.getOrderList():
     #notify that the mail is ready to send
     winsound.PlaySound(os.path.join(audioPath, 'orderingscript.wav'), winsound.SND_FILENAME)
 
-#save the log
-log.outputLog(outputPath)
+#save the log if there's somthing in it
+if log.getMsgList():
+    log.outputLog(outputPath)

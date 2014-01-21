@@ -6,8 +6,7 @@ Created on 2014-01-09
 
 from collections import deque
 from ProductOrder import ProductOrder
-import unicodedata
-from xlrd import open_workbook
+from xlrd import open_workbook, XL_CELL_NUMBER
 from xlwt import Workbook, easyxf
     
 class sourceFileDontExist(Exception):
@@ -92,41 +91,33 @@ class Order:
             for row in self.__rowMap.popleft():
                 prodOrder = ProductOrder()
                 (prodNbCol, qtyCol, descCol, dateCol, employeeCol) = orderBloc
-                try:
-                    prodOrder[ProductOrder.DATE_KEY] = \
-                        str(sheet.cell(row, dateCol).value)
-                except:
-                    prodOrder[ProductOrder.DATE_KEY] = None
-                try:
-                    value = str(sheet.cell(row, prodNbCol).value).split('.')
-                    if len(value) > 1:
-                        value.pop()
-                    prodOrder[ProductOrder.PROD_NB_KEY] = value.pop()
-                except:
-                    prodOrder[ProductOrder.PROD_NB_KEY] = None
-                try:
+                prodOrder[ProductOrder.DATE_KEY] = \
+                    sheet.cell(row, dateCol).value
+                #if the cell contains number, remove the '.0'
+                if sheet.cell_type(row, prodNbCol) == XL_CELL_NUMBER:
+                    prodOrder[ProductOrder.PROD_NB_KEY] = \
+                        unicode(str(int(sheet.cell(row, prodNbCol).value)))
+                else:
+                    prodOrder[ProductOrder.PROD_NB_KEY] = \
+                        sheet.cell(row, prodNbCol).value
+                #if the cell contains number, remove the '.0'
+                if sheet.cell_type(row, qtyCol) == XL_CELL_NUMBER:
                     prodOrder[ProductOrder.QTY_TO_ORDER_KEY] = \
-                        int(sheet.cell(row, qtyCol).value)
-                except:
-                    prodOrder[ProductOrder.QTY_TO_ORDER_KEY] = None
-                try:
-                    prodOrder[ProductOrder.DESC_KEY] = \
-                        unicodedata.normalize('NFKD',
-                            sheet.cell(row, descCol).value).encode('ascii', 'ignore')
-                except:
-                    prodOrder[ProductOrder.DESC_KEY] = None
-                try:
-                    prodOrder[ProductOrder.EMPLOYEE_KEY] = \
-                        str(sheet.cell(row, employeeCol).value)
-                except:
-                    prodOrder[ProductOrder.EMPLOYEE_KEY] = None
-                self.__oderList.append(prodOrder)
+                        unicode(str(int(sheet.cell(row, qtyCol).value)))
+                else:
+                    prodOrder[ProductOrder.QTY_TO_ORDER_KEY] = \
+                        sheet.cell(row, qtyCol).value
+                prodOrder[ProductOrder.DESC_KEY] = \
+                    sheet.cell(row, descCol).value
+                prodOrder[ProductOrder.EMPLOYEE_KEY] = \
+                    sheet.cell(row, employeeCol).value
+                self.__orderList.append(prodOrder)
     
     def __init__(self, outputLog):
         '''
         Constructor
         '''
-        self.__oderList = deque()
+        self.__orderList = deque()
         self.__colMap = deque()
         self.__rowMap = deque()
         self.__outputLog = outputLog
@@ -135,7 +126,7 @@ class Order:
         '''
         Get the length of the actual ProductOrder list.
         '''
-        return len(self.__oderList)
+        return len(self.__orderList)
         
     def loadOrder(self, sourceFile):
         '''
@@ -153,26 +144,26 @@ class Order:
         self.__processLoading(sheet)
         book.release_resources()
         #figure if there was data in the file, if not raise emptyOrder
-        if not self.__oderList:
+        if not self.__orderList:
             raise emptyOrder(sourceFile)
         
     def append(self, prodOrder):
         '''
         Append a ProductOrder
         '''
-        self.__oderList.append(prodOrder)
+        self.__orderList.append(prodOrder)
         
     def popLeft(self):
         '''
         Pop left the ProductOrder list.
         '''
-        return self.__oderList.popleft()
+        return self.__orderList.popleft()
     
     def popRight(self):
         '''
         Pop right th ProductOrder list.
         '''
-        return self.__oderList.pop()
+        return self.__orderList.pop()
     
     def filter(self, ordered):
         '''
@@ -184,35 +175,35 @@ class Order:
         '''
         filteredProdOrder = list()
         #filter the bad productOrder
-        for prodOrder in self.__oderList:
+        for prodOrder in self.__orderList:
             if not prodOrder.isValid():
                 filteredProdOrder.append(prodOrder)
         #remove the ProductOrder filtered
         for prodOrder in filteredProdOrder:
-            self.__oderList.remove(prodOrder)
-            self.__outputLog.logMsg(prodOrder.getProductOrderStr() + ' n\'a pas ete commande a cause d\'information incomplete.')
+            self.__orderList.remove(prodOrder)
+            self.__outputLog.logMsg(prodOrder.getProductOrderStr() + u' n\'a pas ete commande a cause d\'information incomplete.')
         #filter the duplicates
         del filteredProdOrder
         filteredProdOrder = list()
-        for i in range(len(self.__oderList)):
+        for i in range(len(self.__orderList)):
             instanceCmpt = 0
-            for prodOrder in self.__oderList:
-                if prodOrder == self.__oderList[i]:
+            for prodOrder in self.__orderList:
+                if prodOrder == self.__orderList[i]:
                     instanceCmpt += 1
             if instanceCmpt > 1:
                 filteredInst = 0
                 for filteredOrder in filteredProdOrder:
-                    if self.__oderList[i] == filteredOrder:
+                    if self.__orderList[i] == filteredOrder:
                         filteredInst += 1
                 if not filteredInst:
-                    filteredProdOrder.append(self.__oderList[i])
+                    filteredProdOrder.append(self.__orderList[i])
         #remove the ProductOrder filtered
         for prodOrder in filteredProdOrder:
-            self.__oderList.remove(prodOrder)
+            self.__orderList.remove(prodOrder)
         #filter already ordered
         del filteredProdOrder
         filteredProdOrder = list()
-        for prodOrder in self.__oderList:
+        for prodOrder in self.__orderList:
             for oldOrder in ordered.getOrderList():
                 if prodOrder == oldOrder and \
                         -20 < prodOrder.deltaProductOrder(oldOrder) < 20 and \
@@ -220,20 +211,20 @@ class Order:
                     filteredProdOrder.append(prodOrder)
         #remove the ProductOrder filtered
         for prodOrder in filteredProdOrder:
-            self.__oderList.remove(prodOrder)
-            self.__outputLog.logMsg(prodOrder.getProductOrderStr() + ' n\'a pas ete commande a cause d\'une commande datant de moins de 20 jours.')
+            self.__orderList.remove(prodOrder)
+            self.__outputLog.logMsg(prodOrder.getProductOrderStr() + u' n\'a pas ete commande a cause d\'une commande datant de moins de 20 jours.')
             
     def getOrderList(self):
         '''
         Get the whole ProductOrder list.
         '''
-        return self.__oderList
+        return self.__orderList
     
     def clear(self):
         '''
         Clear the order
         '''
-        self.__oderList.clear()
+        self.__orderList.clear()
         
     def __newOrderBloc(self, sheet, cols):
         (prodNbCol, qtyCol, descCol, dateCol, employeeCol) = cols
@@ -262,10 +253,12 @@ class Order:
         sheet = newWorkBook.add_sheet('Feuille1')
 
         #remove old product order
-        if len(self.__oderList) > 0:
-            for i in range(len(self.__oderList)):
-                if 30 < self.__oderList[i].getProductOrderAge < -30:
-                    self.__orderList.remove(self.__oderList[i])
+        oldProdOrder = []
+        for prodOrder in self.__orderList:
+            if prodOrder.getProductOrderAge() > 30:
+                oldProdOrder.append(prodOrder)
+        for prodOrder in oldProdOrder:
+            self.__orderList.remove(prodOrder)
         
         #setup the first bloc of title and the instruction at the end.
         orderBloc = range(len(self.__TITLE_MAP))
@@ -275,7 +268,7 @@ class Order:
         sheet.write(self.__LAST_DATA_ROW + 2, 0, self.__INSTRUCTION_STR,
                     easyxf('font: bold True;'))
         row = self.__1ST_DATA_ROW
-        for prodOrder in self.__oderList:
+        for prodOrder in self.__orderList:
             for col in orderBloc:
                 if self.__TITLE_MAP[col - \
                                     (orderBlocCmpt * (len(orderBloc) + 1))] \

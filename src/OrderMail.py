@@ -16,11 +16,12 @@ class OrderMail:
         - Generate the mail.
     '''
 
-    def __init__(self, to):
+    def __init__(self, to, cc):
         '''
         Constructor
         '''
         self.__to = to
+        self.__cc = cc
         self.__body = []
         
     def addLineToBody(self, line):
@@ -37,5 +38,5 @@ class OrderMail:
         for line in self.__body:
             bodyStr = '<BR>'.join((bodyStr, line))
         bodyStr = bodyStr + '</BODY></HTML>'
-        cmd = 'thunderbird -compose to=\"%s\",subject=\"A COMMANDER\",format=\"1\",body=\"%s\"' % (self.__to, bodyStr)
+        cmd = 'thunderbird -compose to=\"%s\",cc=\"%s\"subject=\"A COMMANDER\",format=\"1\",body=\"%s\"' % (self.__to, self.__cc, bodyStr)
         os.system(cmd)

@@ -4,7 +4,6 @@ Created on 2014-01-09
 @author: julienbacon
 '''
 
-from datetime import date
 from Log import Log
 from ProductOrder import ProductOrder
 from Order import Order, sourceFileDontExist, emptyOrder
@@ -23,12 +22,12 @@ def productOrderBuilder(prodNb, desc, qty, date, employee):
     return prodOrder
     
 class OrderLoadingTest(unittest.TestCase):
-    ATTENDED_RESULTS = [productOrderBuilder('', '', 200, date(1232, 4, 13), ''),
-                         productOrderBuilder('130050', 'coucou', None, date(1231, 4, 13), 'Daniel'),
-                         productOrderBuilder('133840', 'dodo', 50, date(2001, 1, 1), 'justin'),
-                         productOrderBuilder('130090', '', None, None, ''),
-                         productOrderBuilder('203432', 'bonjour', 2000, date(2001, 1, 1), 'jf'),
-                         productOrderBuilder('133045', 'allo', 100, date(2001, 1, 1), 'jb')]
+    ATTENDED_RESULTS = [productOrderBuilder(u'', u'', u'200', u'13/04/1232', u''),
+                         productOrderBuilder(u'130050', u'coucou', None, u'13/04/1231', u'Daniel'),
+                         productOrderBuilder(u'133840', u'dodo', u'50', u'01/01/2001', u'justin'),
+                         productOrderBuilder(u'130090', u'', None, None, u''),
+                         productOrderBuilder(u'203432', u'bonjour', u'2000', u'01/01/2001', u'jf'),
+                         productOrderBuilder(u'133045', u'allo', u'100', u'01/01/2001', u'jb')]
         
     def testOrderLoading(self):
         '''
@@ -64,14 +63,14 @@ class OrderLoadingTest(unittest.TestCase):
         self.assertRaises(emptyOrder, order.loadOrder,
                           os.path.join(TEST_FILE_ROOT, 'OrderTestFile8.xls'))
         
-class filterOderTest(unittest.TestCase):
-    ATTENDED_RESULTS = [productOrderBuilder('203432', 'bonjour', 2000, date(2014, 1, 14), 'jf admin'),
-                        productOrderBuilder('240900', 'lala', 100, date(2014, 1, 14), 'guy'),
-                        productOrderBuilder('130090', 'prout', 200, date(2014, 1, 14), 'jb'),
-                        productOrderBuilder('033840', 'dodo', 50, date(2014, 1, 14), 'justin')]
-    ATTENDED_LOG = ['None X 130050 coucou n\'a pas ete commande a cause d\'information incomplete.',
-                    '200 X   n\'a pas ete commande a cause d\'information incomplete.',
-                    '100 X 133045 allo n\'a pas ete commande a cause d\'une commande datant de moins de 20 jours.']
+class filterOlderTest(unittest.TestCase):
+    ATTENDED_RESULTS = [productOrderBuilder(u'203432', u'bonjour', u'2000', u'14/01/2014', u'jf admin'),
+                        productOrderBuilder(u'240900', u'lala', u'100', u'14/01/2014', u'guy'),
+                        productOrderBuilder(u'130090', u'prout', u'200', u'14/01/2914', u'jb'),
+                        productOrderBuilder(u'033840', u'dodo', u'50', u'14/01/2014', u'justin')]
+    ATTENDED_LOG = [u'N/A X 130050 coucou n\'a pas ete commande a cause d\'information incomplete.',
+                    u'200 X N/A N/A n\'a pas ete commande a cause d\'information incomplete.',
+                    u'100 X 133045 allo n\'a pas ete commande a cause d\'une commande datant de moins de 20 jours.']
     
     def testFilterOrder(self):
         '''
@@ -121,6 +120,7 @@ class clearAndSaveTest (unittest.TestCase):
         self.__attendedResult2 = []
         for prodOrder in self.__originalFile1.getOrderList():
             self.__originalFile2.append(prodOrder)
+        self.__originalFile2.popLeft()
         for prodOrder in self.__originalFile2.getOrderList():
             self.__attendedResult2.append(prodOrder)
             
@@ -133,7 +133,7 @@ class clearAndSaveTest (unittest.TestCase):
         
     def testClearAndSave(self):
         '''
-        Order must be able to clear and save itself.
+        Order must be able to clear and save (removing old order) itself.
         '''
         order1 = Order(self.__log)
         order2 = Order(self.__log)

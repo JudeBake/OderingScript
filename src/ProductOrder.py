@@ -6,6 +6,7 @@ Created on 2014-01-08
 
 from datetime import date
 import re
+import unicodedata
 
 class ProductOrderError(Exception):
     '''
@@ -61,9 +62,7 @@ class ProductOrder:
         try:
             dateValues = list(datePaturn.search(string).groups())
         except:
-            #raise an error
             dateValues = list()
-            pass
         #convert the string list into an integer list
         dateValues = [int(element) for element in dateValues]
         #if the input string has 2 digit for the year, add to it the thousands
@@ -75,9 +74,7 @@ class ProductOrder:
             orderDate = date(dateValues[YEAR_IDX], dateValues[MONTH_IDX],
                              dateValues[DAY_IDX])
         except:
-            #raise an error
             orderDate = None
-            pass
         return orderDate
         
     def __init__(self):
@@ -96,7 +93,7 @@ class ProductOrder:
         '''
         #if date field is asked, return it in string of the format dd/mm/yy
         if key == self.DATE_KEY and self.__orderData[key]:
-            return self.__orderData[key].strftime("%d/%m/%Y")
+            return unicode(self.__orderData[key].strftime("%d/%m/%Y"))
         #if other field, simply return it as is
         else:
             return self.__orderData[key]
@@ -106,12 +103,22 @@ class ProductOrder:
         Wrapper of dict["key"] = value
         For the date field the value must be a string in the format dd/mm/yy. 
         '''
-        #if setting date field, process it into a date object befor assignation
+        #if setting date field, process it into a date object before assignation
         if key == self.DATE_KEY:
-            if type(value).__name__ == 'str':
-                self.__orderData[key] = self.__computeDateString(value)
+            if type(value).__name__ == 'unicode':
+                self.__orderData[key] = \
+                    self.__computeDateString(unicodedata.normalize('NFKD', value)\
+                                             .encode('ascii', 'ignore'))
             else:
+                self.__orderData[key] = None
+        #if setting quantity to order, set as number, as u'X' or as None
+        elif key == self.QTY_TO_ORDER_KEY:
+            if value and value.isdigit():
                 self.__orderData[key] = value
+            elif value == u'X' or value == u'x':
+                self.__orderData[key] = value.lower()
+            else:
+                self.__orderData[key] = None
         #if other field, simply assign it
         else:
             self.__orderData[key] = value
@@ -120,7 +127,7 @@ class ProductOrder:
         '''
         Compare the product number field of two product orders.
         '''
-        return self.__orderData[self.PROD_NB_KEY] == productOrder[self.PROD_NB_KEY]
+        return self.__orderData[self.PROD_NB_KEY][:6] == productOrder[self.PROD_NB_KEY][:6]
         
     def getProductOrderStr(self):
         '''
@@ -128,10 +135,19 @@ class ProductOrder:
         Return an empty string if no data or incomplete data.
         The string returned doesn't contain the date nor the employee.
         '''
-        string = ''
-        string = ' '.join((string, str(self[self.QTY_TO_ORDER_KEY]) + ' X'))
-        string = ' '.join((string, self[self.PROD_NB_KEY]))
-        string = ' '.join((string, self[self.DESC_KEY]))
+        string = u''
+        if self.__orderData[self.QTY_TO_ORDER_KEY]:
+            string = u' '.join((string, self.__orderData[self.QTY_TO_ORDER_KEY] + ' X'))
+        else:
+            string = u' '.join((string, u'N/A X'))
+        if self.__orderData[self.PROD_NB_KEY]:
+            string = u' '.join((string, self.__orderData[self.PROD_NB_KEY]))
+        else:
+            string = u' '.join((string, u'N/A'))
+        if self.__orderData[self.DESC_KEY]:
+            string = u' '.join((string, self.__orderData[self.DESC_KEY]))
+        else:
+            string = u' '.join((string, u'N/A'))
         string = string.lstrip()
         return string
     
@@ -144,7 +160,7 @@ class ProductOrder:
                 
     def getProductOrderAge(self):
         currentDate = date.today()
-        return (self.__orderData[self.DATE_KEY] - currentDate).days
+        return abs((self.__orderData[self.DATE_KEY] - currentDate).days)
                 
     def isValid(self):
         '''
@@ -155,5 +171,7 @@ class ProductOrder:
         for key in self.KEYS:
             if not self.__orderData[key]:
                 validity = False
+        if self.__orderData[self.QTY_TO_ORDER_KEY] == u'0':
+            validity = False
         return validity
             
