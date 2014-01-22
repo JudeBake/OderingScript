@@ -5,6 +5,7 @@ Created on 2014-01-16
 '''
 
 import os
+import unicodedata
 
 class OrderMail:
     '''
@@ -36,7 +37,10 @@ class OrderMail:
         '''
         bodyStr = '<HTML><BODY>'
         for line in self.__body:
+            line = unicodedata.normalize('NFKD', line).encode('ascii', 'replace')
             bodyStr = '<BR>'.join((bodyStr, line))
         bodyStr = bodyStr + '</BODY></HTML>'
-        cmd = 'thunderbird -compose to=\"%s\",cc=\"%s\"subject=\"A COMMANDER\",format=\"1\",body=\"%s\"' % (self.__to, self.__cc, bodyStr)
+        bodyStr = bodyStr.replace(',', '.')
+        cmd = 'thunderbird -compose to=\"%s\",cc=\"%s\",subject=\"A COMMANDER\",format=\"1\",body=\"%s\"' % (self.__to, self.__cc, bodyStr)
+        print(cmd)
         os.system(cmd)
