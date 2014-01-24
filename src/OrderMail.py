@@ -37,7 +37,7 @@ class OrderMail:
         '''
         bodyStr = '<HTML><BODY>'
         for line in self.__body:
-            line = unicodedata.normalize('NFKD', line).encode('ascii', 'replace')
+            line = unicodedata.normalize('NFKD', line).encode('ascii', 'ignore')
             bodyStr = '<BR>'.join((bodyStr, line))
         bodyStr = bodyStr + '</BODY></HTML>'
         bodyStr = bodyStr.replace(',', '.')
