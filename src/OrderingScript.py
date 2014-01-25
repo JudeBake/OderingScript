@@ -14,7 +14,6 @@ OrderingScript is a Ordering Script to order by sending email to Sebastien
 '''
 
 import ctypes
-from exception import BaseException
 import sys
 import os
 import winsound
@@ -78,7 +77,7 @@ if dailyOrder.getOrderList():
         previousOrder.save(previousOrderFile)
     except:
         e = sys.exc_info()[0]
-        log.logMsg('%s' % e)
+        print('%s' % e)
         
     #notify that the mail is ready to send
     winsound.PlaySound(os.path.join(audioPath, 'orderingscript.wav'), winsound.SND_FILENAME)
