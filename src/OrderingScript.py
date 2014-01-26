@@ -20,7 +20,6 @@ import winsound
 
 #change the current working dir
 os.chdir('c:\\Users\\inf02\\Desktop\\OderingScript\\src')
-print(os.getcwd())
 #add the project path to sys.path
 sys.path.append(os.path.join(os.getcwd()))
 

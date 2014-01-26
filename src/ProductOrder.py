@@ -111,10 +111,18 @@ class ProductOrder:
                                              .encode('ascii', 'ignore'))
             else:
                 self.__orderData[key] = None
-        #if setting quantity to order, set as number, as u'X' or as None
+        #if setting quantity to order, set as number, as u'x' or as None
         elif key == self.QTY_TO_ORDER_KEY:
             if value and value.isdigit():
                 self.__orderData[key] = value
+            elif value == u'X' or value == u'x':
+                self.__orderData[key] = value.lower()
+            else:
+                self.__orderData[key] = None
+        #if setting product number, set as 6 digit first, as u'x' or as None
+        elif key == self.PROD_NB_KEY:
+            if value and value[:6].isdigit():
+                self.__orderData[key] = value;
             elif value == u'X' or value == u'x':
                 self.__orderData[key] = value.lower()
             else:
@@ -123,7 +131,7 @@ class ProductOrder:
         else:
             self.__orderData[key] = value
             
-    def __eq__(self, productOrder):
+    def prodNbCmp(self, productOrder):
         '''
         Compare the product number field of two product orders.
         '''

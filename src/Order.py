@@ -188,12 +188,12 @@ class Order:
         for i in range(len(self.__orderList)):
             instanceCmpt = 0
             for prodOrder in self.__orderList:
-                if prodOrder == self.__orderList[i]:
+                if prodOrder.prodNbCmp(self.__orderList[i]):
                     instanceCmpt += 1
             if instanceCmpt > 1:
                 filteredInst = 0
                 for filteredOrder in filteredProdOrder:
-                    if self.__orderList[i] == filteredOrder:
+                    if self.__orderList[i].prodNbCmp(filteredOrder):
                         filteredInst += 1
                 if not filteredInst:
                     filteredProdOrder.append(self.__orderList[i])
@@ -205,7 +205,7 @@ class Order:
         filteredProdOrder = list()
         for prodOrder in self.__orderList:
             for oldOrder in ordered.getOrderList():
-                if prodOrder == oldOrder and \
+                if prodOrder.prodNbCmp(oldOrder) and \
                         -20 < prodOrder.deltaProductOrder(oldOrder) < 20 and \
                         prodOrder[ProductOrder.EMPLOYEE_KEY] != self.__ADMIN_EMPLOYEE:
                     filteredProdOrder.append(prodOrder)
@@ -279,7 +279,7 @@ class Order:
                 elif self.__TITLE_MAP[col - \
                                     (orderBlocCmpt * (len(orderBloc) + 1))] \
                                      == self.__QTY_TITLE:
-                    sheet.row(row).set_cell_number(col,
+                    sheet.row(row).set_cell_text(col,
                                     prodOrder[ProductOrder.QTY_TO_ORDER_KEY],
                                     easyxf('alignment: horizontal center;'))
                 elif self.__TITLE_MAP[col - \
