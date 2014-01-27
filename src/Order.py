@@ -164,14 +164,10 @@ class Order:
         Pop right th ProductOrder list.
         '''
         return self.__orderList.pop()
-    
-    def filter(self, ordered):
+
+    def __filterBadProdOrder(self):
         '''
-        Filter bad and already ordered ProductOrder.
-        Filters are:
-            - bad ProductOrder.
-            - duplicates.
-            - Already Ordered in the last 20 days ProductOrder, except if employee is the admin.
+        Filter the bad product order.
         '''
         filteredProdOrder = list()
         #filter the bad productOrder
@@ -182,13 +178,17 @@ class Order:
         for prodOrder in filteredProdOrder:
             self.__orderList.remove(prodOrder)
             self.__outputLog.logMsg(prodOrder.getProductOrderStr() + u' n\'a pas ete commande a cause d\'information incomplete.')
-        #filter the duplicates
-        del filteredProdOrder
+
+    def __filterDuplicate(self):
+        '''
+        Filter duplicate product order.
+        '''
         filteredProdOrder = list()
         for i in range(len(self.__orderList)):
             instanceCmpt = 0
             for prodOrder in self.__orderList:
-                if prodOrder.prodNbCmp(self.__orderList[i]):
+                if prodOrder.prodNbCmp(self.__orderList[i]) and \
+                       prodOrder[ProductOrder.PROD_NB_KEY] != u'x':
                     instanceCmpt += 1
             if instanceCmpt > 1:
                 filteredInst = 0
@@ -200,19 +200,39 @@ class Order:
         #remove the ProductOrder filtered
         for prodOrder in filteredProdOrder:
             self.__orderList.remove(prodOrder)
-        #filter already ordered
-        del filteredProdOrder
+
+    def __filterAlreadyOrdered(self, ordered):
+        '''
+        Filter already ordered product.
+        '''
         filteredProdOrder = list()
         for prodOrder in self.__orderList:
             for oldOrder in ordered.getOrderList():
                 if prodOrder.prodNbCmp(oldOrder) and \
                         -20 < prodOrder.deltaProductOrder(oldOrder) < 20 and \
-                        prodOrder[ProductOrder.EMPLOYEE_KEY] != self.__ADMIN_EMPLOYEE:
+                        prodOrder[ProductOrder.EMPLOYEE_KEY] != self.__ADMIN_EMPLOYEE \
+                        and prodOrder[ProductOrder.PROD_NB_KEY] != u'x':
                     filteredProdOrder.append(prodOrder)
         #remove the ProductOrder filtered
         for prodOrder in filteredProdOrder:
             self.__orderList.remove(prodOrder)
             self.__outputLog.logMsg(prodOrder.getProductOrderStr() + u' n\'a pas ete commande a cause d\'une commande datant de moins de 20 jours.')
+    
+    def filter(self, ordered):
+        '''
+        Filter bad and already ordered ProductOrder.
+        Filters are:
+            - bad ProductOrder.
+            - duplicates.
+            - Already Ordered in the last 20 days ProductOrder, except if employee is the admin.
+        '''
+        #filter bad product order
+        self.__filterBadProdOrder
+        #filter the duplicates
+        self.__filterDuplicate()
+        #filter already ordered
+        self.__filterAlreadyOrdered(ordered)
+        
             
     def getOrderList(self):
         '''
