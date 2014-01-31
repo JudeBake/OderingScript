@@ -6,6 +6,7 @@ Created on 2014-01-14
 
 from datetime import date
 import os
+import unicodedata
 
 class Log:
     '''
@@ -43,7 +44,7 @@ class Log:
         logFile = open(os.path.join(destinationPath, 'Log_' + \
                                     currentDate.strftime('%d-%m-%Y')) +'.txt', 'w+')
         for msg in self.__msgList:
-            logFile.write(msg + '\n')
+            logFile.write(unicodedata.normalize('NFKD', msg).encode('ascii', 'ignore') + '\n')
         logFile.flush()
         logFile.close()
         

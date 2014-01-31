@@ -72,11 +72,7 @@ if dailyOrder.getOrderList():
     for i in range(len(dailyOrder)):
         previousOrder.append(dailyOrder.popLeft())
     dailyOrder.save(dailyOrderFile)
-    try:
-        previousOrder.save(previousOrderFile)
-    except:
-        e = sys.exc_info()[0]
-        print('%s' % e)
+    previousOrder.save(previousOrderFile)
         
     #notify that the mail is ready to send
     winsound.PlaySound(os.path.join(audioPath, 'orderingscript.wav'), winsound.SND_FILENAME)
@@ -84,3 +80,10 @@ if dailyOrder.getOrderList():
 #save the log if there's somthing in it
 if log.getMsgList():
     log.outputLog(outputPath)
+
+#delete the recuparation file of libre office
+if os.path.exists(os.path.join(outputPath, '.~lock.a_commander.xls#')):
+    os.remove(os.path.join(outputPath, '.~lock.a_commander.xls#'));
+if os.path.exists(os.path.join(outputPath, '.~lock.commander.xls#')):
+    os.remove(os.path.join(outputPath, '.~lock.commander.xls#'));
+    
