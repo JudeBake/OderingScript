@@ -50,7 +50,7 @@ try:
     dailyOrder.loadOrder(dailyOrderFile)
 except:
     #if nothing to order, simply log it and exit
-    log.logMsg('Rien a commander.')
+    log.logMsg(u'Rien a commander.')
     log.outputLog(outputPath)
     sys.exit(0)
 try:
